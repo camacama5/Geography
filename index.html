@@ -13,7 +13,11 @@
         .btn-start { background: var(--primary-blue); color: white; padding: 20px 40px; font-size: 24px; font-weight: bold; border: none; border-radius: 15px; cursor: pointer; transition: 0.3s; margin-top: 20px; }
         .btn-start:hover { transform: scale(1.05); background: #0056b3; }
         #timer { font-size: 48px; color: var(--danger-red); font-weight: bold; margin-bottom: 10px; }
-        #team-name { font-size: 42px; margin: 25px 0; color: #1a1a1a; }
+        
+        /* עיצוב הרמה */
+        #difficulty-label { font-size: 20px; font-weight: bold; color: #555; margin-bottom: 5px; text-transform: uppercase; border-bottom: 2px solid #eee; display: inline-block; padding-bottom: 5px; }
+        
+        #team-name { font-size: 42px; margin: 15px 0 25px 0; color: #1a1a1a; }
         input { padding: 15px; font-size: 22px; width: 80%; border: 3px solid #eee; border-radius: 12px; text-align: center; outline: none; }
         input:focus { border-color: var(--primary-blue); }
         .game-over-title { font-size: 36px; color: var(--danger-red); font-weight: bold; margin-bottom: 15px; }
@@ -30,7 +34,7 @@
 
     <div id="game-screen" class="card hidden">
         <div id="timer">20</div>
-        <div id="difficulty-label" style="color: #666; font-size: 18px;"></div>
+        <div id="difficulty-label"></div>
         <div id="team-name"></div>
         <input type="text" id="answer-input" placeholder="מאיזו מדינה הקבוצה?" autocomplete="off">
         <div id="score-display" style="margin-top:20px; font-weight: bold;">ניקוד: 0</div>
@@ -91,7 +95,16 @@
             document.getElementById('team-name').innerText = q.team;
             document.getElementById('answer-input').value = "";
             document.getElementById('answer-input').focus();
-            document.getElementById('difficulty-label').innerText = `שאלה ${currentIndex + 1} מתוך 14 | שווי: ${calculatePoints(currentIndex)} נק'`;
+            
+            // הגדרת טקסט הרמה
+            let levelText = "";
+            if (currentIndex < 6) levelText = "רמה: קל";
+            else if (currentIndex < 11) levelText = "רמה: בינוני";
+            else levelText = "רמה: קשה";
+            
+            document.getElementById('difficulty-label').innerText = levelText;
+            document.getElementById('score-display').innerText = `ניקוד: ${score} | שאלה ${currentIndex + 1} מתוך 14 | שווי: ${calculatePoints(currentIndex)} נק'`;
+            
             startTimer(currentIndex < 6 ? 20 : (currentIndex < 11 ? 15 : 10));
         }
 
@@ -109,7 +122,6 @@
         document.getElementById('answer-input').addEventListener('input', (e) => {
             if (e.target.value.trim() === currentGameQuestions[currentIndex].country) {
                 score += calculatePoints(currentIndex);
-                document.getElementById('score-display').innerText = "ניקוד: " + score;
                 currentIndex++;
                 setTimeout(showQuestion, 200);
             }
