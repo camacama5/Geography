@@ -3,186 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>טריוויה כדורגל וגאוגרפיה</title>
+    <title>אלופי הגאוגרפיה והכדורגל</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        :root { --primary-blue: #007bff; --danger-red: #e63946; --success-green: #2ecc71; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
         .hidden { display: none !important; }
         
-        #start-screen { text-align: center; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 600px; width: 90%; }
-        .banner-container { display: flex; justify-content: center; margin-top: 30px; }
-        .banner { width: 220px; padding: 30px; cursor: pointer; font-size: 24px; font-weight: bold; color: white; border-radius: 15px; transition: all 0.3s ease; border: none; background-color: #e63946; }
-        .banner:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(230, 57, 70, 0.4); }
+        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; max-width: 600px; width: 90%; }
+        
+        /* באנר התחל */
+        .btn-start { background: var(--primary-blue); color: white; padding: 20px 40px; font-size: 24px; font-weight: bold; border: none; border-radius: 15px; cursor: pointer; transition: 0.3s; }
+        .btn-start:hover { transform: scale(1.05); background: #0056b3; }
 
-        #game-screen { background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        #timer { font-size: 32px; color: #e63946; font-weight: bold; margin-bottom: 10px; }
-        #difficulty-label { color: #666; font-size: 18px; }
-        #team-name { font-size: 36px; margin: 20px 0; color: #1a1a1a; min-height: 50px; }
-        input { padding: 12px; font-size: 20px; width: 80%; border: 2px solid #ddd; border-radius: 10px; text-align: center; outline: none; }
-        input:focus { border-color: #e63946; }
-        #score-display { margin-top: 20px; font-size: 18px; font-weight: bold; }
+        /* טיימר וניקוד */
+        #timer { font-size: 48px; color: var(--danger-red); font-weight: bold; margin-bottom: 10px; }
+        #team-name { font-size: 42px; margin: 25px 0; color: #1a1a1a; }
+        input { padding: 15px; font-size: 22px; width: 80%; border: 3px solid #eee; border-radius: 12px; text-align: center; outline: none; }
+        input:focus { border-color: var(--primary-blue); }
+
+        /* מסך סיום */
+        .game-over-title { font-size: 32px; color: var(--danger-red); font-weight: bold; margin-bottom: 15px; }
+        .rank-msg { font-size: 24px; color: #333; line-height: 1.4; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px; }
+        .final-score { font-size: 50px; color: var(--primary-blue); font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="start-screen">
-        <h1>מה שבטוח שאתם טובים בגאוגרפיה!</h1>
-        <p>לחצו על הבאנר ותראו כמה ענף הכדורגל משתלב עם ידע גאוגרפי.</p>
-        <div class="banner-container">
-            <button class="banner" onclick="startGame()">כדורגל</button>
-        </div>
+    <!-- מסך פתיחה -->
+    <div id="start-screen" class="card">
+        <h1>תמיד אמרו לכם שכדורגל לא יעזור לכם בחיים?</h1>
+        <h3>שלשחק פיפא זה בזבוז זמן? בואו להוכיח שאתם אלופים בגאוגרפיה!</h3>
+        <button class="btn-start" onclick="startGame()">התחל במשחק</button>
     </div>
 
-    <div id="game-screen" class="hidden">
+    <!-- מסך משחק -->
+    <div id="game-screen" class="card hidden">
         <div id="timer">20</div>
-        <div id="difficulty-label">רמה: קלה (1 נק')</div>
-        <div id="team-name">טוען...</div>
+        <div id="difficulty-label">רמה: קלה</div>
+        <div id="team-name"></div>
         <input type="text" id="answer-input" placeholder="מאיזו מדינה הקבוצה?" autocomplete="off">
-        <div id="score-display">ניקוד: 0</div>
+        <div id="score-display" style="margin-top:20px;">ניקוד: 0</div>
+    </div>
+
+    <!-- מסך סיום -->
+    <div id="end-screen" class="card hidden">
+        <div class="game-over-title" id="end-reason">נגמר המשחק!</div>
+        <div class="final-score" id="end-score">0</div>
+        <div class="rank-msg" id="end-rank-msg"></div>
+        <button class="btn-start" onclick="location.reload()">נסה שוב מהתחלה</button>
     </div>
 
     <script>
         const allQuestions = {
-            easy: [
-                { team: "שאלקה 04", country: "גרמניה" }, { team: "ברוסיה דורטמונד", country: "גרמניה" }, { team: "שטרום גראץ", country: "אוסטריה" },
-                { team: "אטאלנטה", country: "איטליה" }, { team: "בארי", country: "איטליה" }, { team: "פארמה", country: "איטליה" },
-                { team: "אסטון וילה", country: "אנגליה" }, { team: "וולברהמפטון וונדררס", country: "אנגליה" }, { team: "קריסטל פאלאס", country: "אנגליה" },
-                { team: "מכלן", country: "בלגיה" }, { team: "גנק", country: "בלגיה" }, { team: "רויאל אוניון סן-ז'ילואז", country: "בלגיה" },
-                { team: "סטנדרד לייז'", country: "בלגיה" }, { team: "קלאב ברוז'", country: "בלגיה" }, { team: "א.ז. אלקמאר", country: "הולנד" },
-                { team: "חרונינגן", country: "הולנד" }, { team: "רודה", country: "הולנד" }, { team: "דה חראפסחאפ", country: "הולנד" },
-                { team: "ניימכן", country: "הולנד" }, { team: "פנאתינאיקוס", country: "יוון" }, { team: "אולימפיאקוס", country: "יוון" },
-                { team: "ריו אבה", country: "פורטוגל" }, { team: "ספורטינג בראגה", country: "פורטוגל" }, { team: "פורטו", country: "פורטוגל" },
-                { team: "ניס", country: "צרפת" }, { team: "ליל", country: "צרפת" }, { team: "נאנט", country: "צרפת" },
-                { team: "פושקש אקדמיה", country: "הונגריה" }, { team: "פרנצווארוש", country: "הונגריה" }, { team: "רוזנבורג", country: "נורווגיה" },
-                { team: "מולדה", country: "נורווגיה" }, { team: "בודה/גלימט", country: "נורווגיה" }, { team: "פנרבחצ'ה", country: "טורקיה" },
-                { team: "אנטליהספור", country: "טורקיה" }, { team: "פ.צ. קופנהגן", country: "דנמרק" }, { team: "ארמיניה בילפלד", country: "גרמניה" },
-                { team: "לך פוזנן", country: "פולין" }
-            ],
-            medium: [
-                { team: "וולפסבורג", country: "גרמניה" }, { team: "וולפסברג", country: "אוסטריה" }, { team: "ריינדורף אלטאך", country: "אוסטריה" },
-                { team: "ריד", country: "אוסטריה" }, { team: "ססואולו", country: "איטליה" }, { team: "קרמונזה", country: "איטליה" },
-                { team: "גנואה", country: "איטליה" }, { team: "ספציה", country: "איטליה" }, { team: "מילוול", country: "אנגליה" },
-                { team: "ק.פ.ר", country: "אנגליה" }, { team: "שרלרואה", country: "בלגיה" }, { team: "אנדרלכט", country: "בלגיה" },
-                { team: "קמבור", country: "הולנד" }, { team: "טלסטאר ספורטקלאב", country: "הולנד" }, { team: "הראקלס אלמלו", country: "הולנד" },
-                { team: "גו אהד איגלס", country: "הולנד" }, { team: "לאריסה", country: "יוון" }, { team: "לאנס", country: "צרפת" },
-                { team: "מץ", country: "צרפת" }, { team: "בסטיה", country: "צרפת" }, { team: "דנקרק", country: "צרפת" },
-                { team: "בודוצ'נוסט פודגוריצה", country: "מונטנגרו" }, { team: "דברצן ו.ס.ק.", country: "הונגריה" }, { team: "לילסטרום", country: "נורווגיה" },
-                { team: "פרדריקסטאד", country: "נורווגיה" }, { team: "ברונדבי", country: "דנמרק" }, { team: "מיטיולן", country: "דנמרק" },
-                { team: "גרויטר פירט", country: "גרמניה" }, { team: "הולשטיין קיל", country: "גרמניה" }, { team: "יגילוניה ביאליסטוק", country: "פולין" },
-                { team: "גאקאאס קטוביצה", country: "פולין" }, { team: "היברניאן", country: "סקוטלנד" }, { team: "סנט מירן", country: "סקוטלנד" }, { team: "אברדין", country: "סקוטלנד" }
-            ],
-            hard: [
-                { team: "דונקסטר רוברס", country: "אנגליה" }, { team: "פורט וייל", country: "אנגליה" }, { team: "ויקם וונדררס", country: "אנגליה" },
-                { team: "זולטה ורכם", country: "בלגיה" }, { team: "דנדר", country: "בלגיה" }, { team: "הלמונד ספורט", country: "הולנד" },
-                { team: "אמן", country: "הולנד" }, { team: "קיפסיה", country: "יוון" }, { team: "לבדיאקוס", country: "יוון" },
-                { team: "סנטה קלרה", country: "פורטוגל" }, { team: "רודז", country: "צרפת" }, { team: "אינטר טורקו", country: "פינלנד" },
-                { team: "האמארקאמארטנה", country: "נורווגיה" }, { team: "גנצ'לרבירלי", country: "טורקיה" }, { team: "פרויסן מינסטר", country: "גרמניה" },
-                { team: "הפנרפיירדיר", country: "איסלנד" }, { team: "קורונה קיילצה", country: "פולין" }
-            ]
+            easy: [{team:"שאלקה 04",country:"גרמניה"},{team:"ברוסיה דורטמונד",country:"גרמניה"},{team:"שטרום גראץ",country:"אוסטריה"},{team:"אטאלנטה",country:"איטליה"},{team:"בארי",country:"איטליה"},{team:"פארמה",country:"איטליה"},{team:"אסטון וילה",country:"אנגליה"},{team:"וולברהמפטון וונדררס",country:"אנגליה"},{team:"קריסטל פאלאס",country:"אנגליה"},{team:"מכלן",country:"בלגיה"},{team:"גנק",country:"בלגיה"},{team:"רויאל אוניון סן-ז'ילואז",country:"בלגיה"},{team:"סטנדרד לייז'",country:"בלגיה"},{team:"קלאב ברוז'",country:"בלגיה"},{team:"א.ז. אלקמאר",country:"הולנד"},{team:"חרונינגן",country:"הולנד"},{team:"רודה",country:"הולנד"},{team:"דה חראפסחאפ",country:"הולנד"},{team:"ניימכן",country:"הולנד"},{team:"פנאתינאיקוס",country:"יוון"},{team:"אולימפיאקוס",country:"יוון"},{team:"ריו אבה",country:"פורטוגל"},{team:"ספורטינג בראגה",country:"פורטוגל"},{team:"פורטו",country:"פורטוגל"},{team:"ניס",country:"צרפת"},{team:"ליל",country:"צרפת"},{team:"נאנט",country:"צרפת"},{team:"פושקש אקדמיה",country:"הונגריה"},{team:"פרנצווארוש",country:"הונגריה"},{team:"רוזנבורג",country:"נורווגיה"},{team:"מולדה",country:"נורווגיה"},{team:"בודה/גלימט",country:"נורווגיה"},{team:"פנרבחצ'ה",country:"טורקיה"},{team:"אנטליהספור",country:"טורקיה"},{team:"פ.צ. קופנהגן",country:"דנמרק"},{team:"ארמיניה בילפלד",country:"גרמניה"},{team:"לך פוזנן",country:"פולין"}],
+            medium: [{team:"וולפסבורג",country:"גרמניה"},{team:"וולפסברג",country:"אוסטריה"},{team:"ריינדורף אלטאך",country:"אוסטריה"},{team:"ריד",country:"אוסטריה"},{team:"ססואולו",country:"איטליה"},{team:"קרמונזה",country:"איטליה"},{team:"גנואה",country:"איטליה"},{team:"ספציה",country:"איטליה"},{team:"מילוול",country:"אנגליה"},{team:"ק.פ.ר",country:"אנגליה"},{team:"שרלרואה",country:"בלגיה"},{team:"אנדרלכט",country:"בלגיה"},{team:"קמבור",country:"הולנד"},{team:"טלסטאר ספורטקלאב",country:"הולנד"},{team:"הראקלס אלמלו",country:"הולנד"},{team:"גו אהד איגלס",country:"הולנד"},{team:"לאריסה",country:"יוון"},{team:"לאנס",country:"צרפת"},{team:"מץ",country:"צרפת"},{team:"בסטיה",country:"צרפת"},{team:"דנקרק",country:"צרפת"},{team:"בודוצ'נוסט פודגוריצה",country:"מונטנגרו"},{team:"דברצן ו.ס.ק.",country:"הונגריה"},{team:"לילסטרום",country:"נורווגיה"},{team:"פרדריקסטאד",country:"נורווגיה"},{team:"ברונדבי",country:"דנמרק"},{team:"מיטיולן",country:"דנמרק"},{team:"גרויטר פירט",country:"גרמניה"},{team:"הולשטיין קיל",country:"גרמניה"},{team:"יגילוניה ביאליסטוק",country:"פולין"},{team:"גאקאאס קטוביצה",country:"פולין"},{team:"היברניאן",country:"סקוטלנד"},{team:"סנט מירן",country:"סקוטלנד"},{team:"אברדין",country:"סקוטלנד"}],
+            hard: [{team:"דונקסטר רוברס",country:"אנגליה"},{team:"פורט וייל",country:"אנגליה"},{team:"ויקם וונדררס",country:"אנגליה"},{team:"זולטה ורכם",country:"בלגיה"},{team:"דנדר",country:"בלגיה"},{team:"הלמונד ספורט",country:"הולנד"},{team:"אמן",country:"הולנד"},{team:"קיפסיה",country:"יוון"},{team:"לבדיאקוס",country:"יוון"},{team:"סנטה קלרה",country:"פורטוגל"},{team:"רודז",country:"צרפת"},{team:"אינטר טורקו",country:"פינלנד"},{team:"האמארקאמארטנה",country:"נורווגיה"},{team:"גנצ'לרבירלי",country:"טורקיה"},{team:"פרויסן מינסטר",country:"גרמניה"},{team:"הפנרפיירדיר",country:"איסלנד"},{team:"קורונה קיילצה",country:"פולין"}]
         };
 
+        let lastUsed = JSON.parse(localStorage.getItem('lastPlayedTeams')) || [];
         let currentGameQuestions = [];
         let currentIndex = 0;
         let score = 0;
         let timerInterval;
-        let timeLeft;
 
-        function shuffle(array) {
-            return array.sort(() => Math.random() - 0.5);
+        function getSmartQuestions(level, count) {
+            let pool = allQuestions[level].filter(q => !lastUsed.includes(q.team));
+            if (pool.length < count) { pool = [...allQuestions[level]]; lastUsed = []; } // ריענון אם נגמר
+            
+            let shuffled = pool.sort(() => Math.random() - 0.5);
+            let selected = [];
+            
+            for (let q of shuffled) {
+                if (selected.length === count) break;
+                // מניעת אותה מדינה ברצף
+                if (selected.length > 0 && selected[selected.length-1].country === q.country) continue;
+                selected.push(q);
+                lastUsed.push(q.team);
+            }
+            
+            if (selected.length < count) selected = shuffled.slice(0, count); // פולבק
+            return selected;
         }
 
         function startGame() {
-            const easy5 = shuffle([...allQuestions.easy]).slice(0, 5);
-            const medium3 = shuffle([...allQuestions.medium]).slice(0, 3);
-            const hard3 = shuffle([...allQuestions.hard]).slice(0, 3);
+            const q1 = getSmartQuestions('easy', 5);
+            const q2 = getSmartQuestions('medium', 3);
+            const q3 = getSmartQuestions('hard', 3);
             
-            currentGameQuestions = [...easy5, ...medium3, ...hard3];
-            currentIndex = 0;
-            score = 0;
+            localStorage.setItem('lastPlayedTeams', JSON.stringify(lastUsed.slice(-20))); // שמירת 20 אחרונים
+            currentGameQuestions = [...q1, ...q2, ...q3];
             
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
-            document.getElementById('score-display').innerText = "ניקוד: 0";
-            
             showQuestion();
         }
 
         function showQuestion() {
-            if (currentIndex >= currentGameQuestions.length) {
-                gameOver("ניצחת את המשחק!");
-                return;
-            }
+            if (currentIndex >= currentGameQuestions.length) { gameOver("ניצחת את כל המשחק!"); return; }
 
             const q = currentGameQuestions[currentIndex];
             document.getElementById('team-name').innerText = q.team;
-            document.getElementById('answer-input').value = "";
-            document.getElementById('answer-input').focus();
+            const input = document.getElementById('answer-input');
+            input.value = ""; input.focus();
 
-            if (currentIndex < 5) {
-                timeLeft = 20;
-                document.getElementById('difficulty-label').innerText = "רמה: קלה (1 נק')";
-            } else if (currentIndex < 8) {
-                timeLeft = 15;
-                document.getElementById('difficulty-label').innerText = "רמה: בינונית (2 נק')";
-            } else {
-                timeLeft = 10;
-                document.getElementById('difficulty-label').innerText = "רמה: קשה (3 נק')";
-            }
-
-            startTimer();
+            let time = currentIndex < 5 ? 20 : (currentIndex < 8 ? 15 : 10);
+            document.getElementById('difficulty-label').innerText = `רמה: ${currentIndex < 5 ? 'קלה' : (currentIndex < 8 ? 'בינונית' : 'קשה')}`;
+            
+            startTimer(time);
         }
 
-        function startTimer() {
+        function startTimer(time) {
             clearInterval(timerInterval);
+            let timeLeft = time;
             document.getElementById('timer').innerText = timeLeft;
             timerInterval = setInterval(() => {
                 timeLeft--;
                 document.getElementById('timer').innerText = timeLeft;
-                if (timeLeft <= 0) {
-                    gameOver("נגמר הזמן! הפסדת.");
-                }
+                if (timeLeft <= 0) gameOver("נגמר הזמן!");
             }, 1000);
         }
 
-        document.getElementById('answer-input').addEventListener('keypress', function(e) {
+        document.getElementById('answer-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                const userAnswer = this.value.trim();
-                const correctAnswer = currentGameQuestions[currentIndex].country;
-                
-                if (userAnswer === correctAnswer) {
-                    if (currentIndex < 5) score += 1;
-                    else if (currentIndex < 8) score += 2;
-                    else score += 3;
-                    
+                const q = currentGameQuestions[currentIndex];
+                if (e.target.value.trim() === q.country) {
+                    score += (currentIndex < 5 ? 1 : (currentIndex < 8 ? 2 : 3));
                     document.getElementById('score-display').innerText = "ניקוד: " + score;
                     currentIndex++;
                     showQuestion();
                 } else {
-                    if (currentIndex === 0) {
-                        gameOver("לא טוב דודו, תמחק!");
-                    } else {
-                        gameOver(`טעות! המדינה היא ${correctAnswer}.`);
-                    }
+                    gameOver(currentIndex === 0 ? "לא טוב דודו, תמחק!" : `טעות! המדינה היא ${q.country}`);
                 }
             }
         });
 
-        function getRankMessage(s) {
-            if (s >= 2 && s <= 5) return "אתה צופה בכדורגל אבל כנראה שרק בליגת האלופות.";
-            if (s > 5 && s <= 9) return "הליגה האירופית קטנה עליך, יאללה בוא, נוסעים לראות ליגה לאומית.";
-            if (s > 9 && s <= 14) return "אתה רוי מקאי, אתה רונאלד דה בור, אתה אגדה הולנדית של שנות ה-2000, בוא זריז יש משחק של טוונטה נגד ויטסה.";
-            if (s > 14 && s <= 19) return "אתה אגדת כדורגל אירופית, אתה אורח כבוד אצל תיירי הנרי ודל פיירו רוצה ממך טיפים, אתה פאגינג גאון.";
-            if (s > 19 && s <= 25) return "אתה אגדה חייה, אתה רונלדו השמן לפני שהיה כריסטיאנו, אתה דודו אווט בלה ליגה ואתה בלתי נגמר.";
-            if (s > 25 && s <= 35) return "אתה הפועל תל אביב בגביע אופ\"א, עברת כל כך הרבה שאף אחד כבר לא יודע אם היריבה הבאה קיימת.";
-            if (s > 35 && s <= 45) return "בטח אתה אומר שהכל היה סטאם, יאפ סטאם.";
-            if (s > 45) return "אתה כל כך גדול שהדחת קבוצה מאיסלנד ממוקדמות הליגה האזורית.";
-            return "";
-        }
-
         function gameOver(reason) {
             clearInterval(timerInterval);
-            const rankMsg = getRankMessage(score);
-            alert(reason + "\n\n" + (rankMsg ? rankMsg + "\n\n" : "") + "ניקוד סופי: " + score);
-            location.reload();
+            document.getElementById('game-screen').classList.add('hidden');
+            const endScreen = document.getElementById('end-screen');
+            endScreen.classList.remove('hidden');
+            
+            document.getElementById('end-reason').innerText = reason;
+            document.getElementById('end-score').innerText = score;
+            document.getElementById('end-rank-msg').innerText = getRankMessage(score);
+        }
+
+        function getRankMessage(s) {
+            if (s < 2) return "לא משהו בכלל...";
+            if (s <= 5) return "אתה צופה בכדורגל אבל כנראה שרק בליגת האלופות.";
+            if (s <= 9) return "הליגה האירופית קטנה עליך, יאללה בוא, נוסעים לראות ליגה לאומית.";
+            if (s <= 14) return "אתה רוי מקאי, רונאלד דה בור, אגדה הולנדית! בוא לטוונטה נגד ויטסה.";
+            if (s <= 19) return "אתה אגדת כדורגל! תיירי הנרי ודל פיירו רוצים ממך טיפים.";
+            if (s <= 25) return "אתה רונלדו השמן לפני שהיה כריסטיאנו, אתה דודו אווט בלה ליגה!";
+            if (s <= 35) return "אתה הפועל תל אביב בגביע אופ\"א - עברת הכל!";
+            if (s <= 45) return "הכל היה סטאם, יאפ סטאם.";
+            return "הדחת קבוצה מאיסלנד ממוקדמות הליגה האזורית!";
         }
     </script>
 </body>
