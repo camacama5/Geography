@@ -8,11 +8,8 @@
         :root { --primary-blue: #007bff; --danger-red: #e63946; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
         .hidden { display: none !important; }
-        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; max-width: 650px; width: 95%; }
-        
-        /* כותרת ראשית אחידה */
+        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; max-width: 700px; width: 95%; }
         h1 { font-size: 28px; line-height: 1.4; margin-bottom: 20px; }
-        
         .btn-start { background: var(--primary-blue); color: white; padding: 20px 40px; font-size: 24px; font-weight: bold; border: none; border-radius: 15px; cursor: pointer; transition: 0.3s; margin-top: 20px; }
         .btn-start:hover { transform: scale(1.05); background: #0056b3; }
         #timer { font-size: 48px; color: var(--danger-red); font-weight: bold; margin-bottom: 10px; }
@@ -33,7 +30,7 @@
 
     <div id="game-screen" class="card hidden">
         <div id="timer">20</div>
-        <div id="difficulty-label"></div>
+        <div id="difficulty-label" style="color: #666; font-size: 18px;"></div>
         <div id="team-name"></div>
         <input type="text" id="answer-input" placeholder="מאיזו מדינה הקבוצה?" autocomplete="off">
         <div id="score-display" style="margin-top:20px; font-weight: bold;">ניקוד: 0</div>
@@ -59,6 +56,7 @@
         let currentIndex = 0;
         let score = 0;
         let timerInterval;
+        let isFinished = false;
 
         function getSmartQuestions(level, count) {
             let pool = allQuestions[level].filter(q => !lastUsed.includes(q.team));
@@ -84,12 +82,16 @@
         }
 
         function showQuestion() {
-            if (currentIndex >= currentGameQuestions.length) { gameOver("ניצחת את המשחק!"); return; }
+            if (currentIndex >= currentGameQuestions.length) { 
+                isFinished = true;
+                gameOver("הגעת לסוף!"); 
+                return; 
+            }
             const q = currentGameQuestions[currentIndex];
             document.getElementById('team-name').innerText = q.team;
             document.getElementById('answer-input').value = "";
             document.getElementById('answer-input').focus();
-            document.getElementById('difficulty-label').innerText = `שאלה ${currentIndex + 1} | שווי: ${calculatePoints(currentIndex)} נק'`;
+            document.getElementById('difficulty-label').innerText = `שאלה ${currentIndex + 1} מתוך 14 | שווי: ${calculatePoints(currentIndex)} נק'`;
             startTimer(currentIndex < 6 ? 20 : (currentIndex < 11 ? 15 : 10));
         }
 
@@ -119,20 +121,21 @@
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('end-screen').classList.remove('hidden');
             
-            // תיקון לוגיקת "לא טוב דודו"
             if (currentIndex === 0 && reason !== "נגמר הזמן!") {
                 document.getElementById('end-reason').innerText = "לא טוב דודו, תמחק!";
             } else {
                 document.getElementById('end-reason').innerText = reason;
             }
 
-            document.getElementById('correct-answer-reveal').innerText = q ? `המדינה הנכונה הייתה: ${q.country}` : "";
+            document.getElementById('correct-answer-reveal').innerText = (q && !isFinished) ? `המדינה הנכונה הייתה: ${q.country}` : "";
             document.getElementById('end-score').innerText = score;
             document.getElementById('end-rank-msg').innerText = getRankMessage(score);
         }
 
         function getRankMessage(s) {
+            if (isFinished) return "הגעת לסוף, מכאן זה רק לשמוע את השירים של פיפא 98, ללכת למשחק בליגה השלישית בפורטוגל, להגיע לסיבוב הראשון של הגביע הגרמני ולהתרגש משמות כמו נאק ברדה, צסקא סופיה, פלורה טאלין וראסינג סנטנדר.";
             if (currentIndex === 0) return ""; 
+            
             if (s >= 2 && s <= 5) return "אתה צופה בכדורגל אבל כנראה שרק בליגת האלופות.";
             if (s > 5 && s <= 9) return "הליגה האירופית קטנה עליך,יאללה בוא, נוסעים לראות ליגה לאומית.";
             if (s > 9 && s <= 14) return "אתה רוי מקאי, אתה רונאלד דה בור, אתה אגדה הולנדית של שנות ה-2000, בוא זריז יש משחק של טוונטה נגד  ויטסה.";
@@ -141,6 +144,8 @@
             if (s > 30 && s <= 40) return "אתה הפועל תל אביב בגביע אופ\"א עברת כל כך הרבה שאף אחד כבר לא יודע אם הירבה הבאה קיימת.";
             if (s > 40 && s <= 59) return "בטח אתה אומר שהכל היה סטאם, יאפ סטאם.";
             if (s >= 60 && s <= 90) return "אתה כל כך גדול שהדחת קבוצה מאיסלנד ממוקדמות הליגה האזורית.";
+            if (s > 90) return "אתה דודו דהן, אתה אייל לחמן, אתה אדם שיודע מי משחק בליגה הקזחית השנייה. אתה סגן אלוף המשחק (למה סגן אתה שואל?, כי לא הגעת לנק' הסיום!!!!)";
+            
             return "";
         }
     </script>
