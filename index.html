@@ -8,49 +8,41 @@
         :root { --primary-blue: #007bff; --danger-red: #e63946; --success-green: #2ecc71; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
         .hidden { display: none !important; }
-        
         .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; max-width: 600px; width: 90%; }
-        
-        /* באנר התחל */
-        .btn-start { background: var(--primary-blue); color: white; padding: 20px 40px; font-size: 24px; font-weight: bold; border: none; border-radius: 15px; cursor: pointer; transition: 0.3s; }
+        .btn-start { background: var(--primary-blue); color: white; padding: 20px 40px; font-size: 24px; font-weight: bold; border: none; border-radius: 15px; cursor: pointer; transition: 0.3s; margin-top: 20px; }
         .btn-start:hover { transform: scale(1.05); background: #0056b3; }
-
-        /* טיימר וניקוד */
         #timer { font-size: 48px; color: var(--danger-red); font-weight: bold; margin-bottom: 10px; }
         #team-name { font-size: 42px; margin: 25px 0; color: #1a1a1a; }
         input { padding: 15px; font-size: 22px; width: 80%; border: 3px solid #eee; border-radius: 12px; text-align: center; outline: none; }
         input:focus { border-color: var(--primary-blue); }
-
-        /* מסך סיום */
         .game-over-title { font-size: 32px; color: var(--danger-red); font-weight: bold; margin-bottom: 15px; }
-        .rank-msg { font-size: 24px; color: #333; line-height: 1.4; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px; }
+        .correct-answer-was { font-size: 20px; color: #555; margin-bottom: 10px; }
+        .rank-msg { font-size: 22px; color: #333; line-height: 1.4; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px; }
         .final-score { font-size: 50px; color: var(--primary-blue); font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <!-- מסך פתיחה -->
     <div id="start-screen" class="card">
         <h1>תמיד אמרו לכם שכדורגל לא יעזור לכם בחיים?</h1>
         <h3>שלשחק פיפא זה בזבוז זמן? בואו להוכיח שאתם אלופים בגאוגרפיה!</h3>
         <button class="btn-start" onclick="startGame()">התחל במשחק</button>
     </div>
 
-    <!-- מסך משחק -->
     <div id="game-screen" class="card hidden">
         <div id="timer">20</div>
         <div id="difficulty-label">רמה: קלה</div>
         <div id="team-name"></div>
         <input type="text" id="answer-input" placeholder="מאיזו מדינה הקבוצה?" autocomplete="off">
-        <div id="score-display" style="margin-top:20px;">ניקוד: 0</div>
+        <div id="score-display" style="margin-top:20px; font-weight: bold;">ניקוד: 0</div>
     </div>
 
-    <!-- מסך סיום -->
     <div id="end-screen" class="card hidden">
         <div class="game-over-title" id="end-reason">נגמר המשחק!</div>
+        <div class="correct-answer-was" id="correct-answer-reveal"></div>
         <div class="final-score" id="end-score">0</div>
         <div class="rank-msg" id="end-rank-msg"></div>
-        <button class="btn-start" onclick="location.reload()">נסה שוב מהתחלה</button>
+        <button class="btn-start" onclick="location.reload()">נסה שוב</button>
     </div>
 
     <script>
@@ -68,47 +60,40 @@
 
         function getSmartQuestions(level, count) {
             let pool = allQuestions[level].filter(q => !lastUsed.includes(q.team));
-            if (pool.length < count) { pool = [...allQuestions[level]]; lastUsed = []; } // ריענון אם נגמר
-            
+            if (pool.length < count) { pool = [...allQuestions[level]]; lastUsed = []; }
             let shuffled = pool.sort(() => Math.random() - 0.5);
-            let selected = [];
-            
-            for (let q of shuffled) {
-                if (selected.length === count) break;
-                // מניעת אותה מדינה ברצף
-                if (selected.length > 0 && selected[selected.length-1].country === q.country) continue;
-                selected.push(q);
-                lastUsed.push(q.team);
-            }
-            
-            if (selected.length < count) selected = shuffled.slice(0, count); // פולבק
-            return selected;
+            return shuffled.slice(0, count);
         }
 
         function startGame() {
-            const q1 = getSmartQuestions('easy', 5);
-            const q2 = getSmartQuestions('medium', 3);
+            const q1 = getSmartQuestions('easy', 6);
+            const q2 = getSmartQuestions('medium', 5);
             const q3 = getSmartQuestions('hard', 3);
-            
-            localStorage.setItem('lastPlayedTeams', JSON.stringify(lastUsed.slice(-20))); // שמירת 20 אחרונים
             currentGameQuestions = [...q1, ...q2, ...q3];
             
+            currentGameQuestions.forEach(q => lastUsed.push(q.team));
+            localStorage.setItem('lastPlayedTeams', JSON.stringify(lastUsed.slice(-30)));
+
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
             showQuestion();
         }
 
+        function calculatePoints(index) {
+            const pointsMap = { 0:1, 1:1, 2:3, 3:3, 4:5, 5:5, 6:9, 7:10, 8:12 };
+            if (index in pointsMap) return pointsMap[index];
+            return 12 + ((index - 8) * 3); // כל שאלה מעבר ל-9 מוסיפה 3 נקודות
+        }
+
         function showQuestion() {
             if (currentIndex >= currentGameQuestions.length) { gameOver("ניצחת את כל המשחק!"); return; }
-
             const q = currentGameQuestions[currentIndex];
             document.getElementById('team-name').innerText = q.team;
             const input = document.getElementById('answer-input');
             input.value = ""; input.focus();
 
-            let time = currentIndex < 5 ? 20 : (currentIndex < 8 ? 15 : 10);
-            document.getElementById('difficulty-label').innerText = `רמה: ${currentIndex < 5 ? 'קלה' : (currentIndex < 8 ? 'בינונית' : 'קשה')}`;
-            
+            let time = currentIndex < 6 ? 20 : (currentIndex < 11 ? 15 : 10);
+            document.getElementById('difficulty-label').innerText = `שאלה ${currentIndex + 1} | שווי: ${calculatePoints(currentIndex)} נק'`;
             startTimer(time);
         }
 
@@ -123,33 +108,43 @@
             }, 1000);
         }
 
+        document.getElementById('answer-input').addEventListener('input', (e) => {
+            const userAnswer = e.target.value.trim();
+            const correctAnswer = currentGameQuestions[currentIndex].country;
+            
+            if (userAnswer === correctAnswer) {
+                score += calculatePoints(currentIndex);
+                document.getElementById('score-display').innerText = "ניקוד: " + score;
+                currentIndex++;
+                setTimeout(showQuestion, 200); // השהייה קלה למעבר חלק
+            }
+        });
+
+        // למקרה שהמשתמש לוחץ Enter בטעות עם תשובה לא נכונה
         document.getElementById('answer-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                const q = currentGameQuestions[currentIndex];
-                if (e.target.value.trim() === q.country) {
-                    score += (currentIndex < 5 ? 1 : (currentIndex < 8 ? 2 : 3));
-                    document.getElementById('score-display').innerText = "ניקוד: " + score;
-                    currentIndex++;
-                    showQuestion();
-                } else {
-                    gameOver(currentIndex === 0 ? "לא טוב דודו, תמחק!" : `טעות! המדינה היא ${q.country}`);
+                const userAnswer = e.target.value.trim();
+                const correctAnswer = currentGameQuestions[currentIndex].country;
+                if (userAnswer !== correctAnswer) {
+                    gameOver(currentIndex === 0 ? "לא טוב דודו, תמחק!" : "טעות!");
                 }
             }
         });
 
         function gameOver(reason) {
             clearInterval(timerInterval);
+            const q = currentGameQuestions[currentIndex];
             document.getElementById('game-screen').classList.add('hidden');
-            const endScreen = document.getElementById('end-screen');
-            endScreen.classList.remove('hidden');
+            document.getElementById('end-screen').classList.remove('hidden');
             
             document.getElementById('end-reason').innerText = reason;
+            document.getElementById('correct-answer-reveal').innerText = q ? `המדינה הנכונה הייתה: ${q.country}` : "";
             document.getElementById('end-score').innerText = score;
             document.getElementById('end-rank-msg').innerText = getRankMessage(score);
         }
 
         function getRankMessage(s) {
-            if (s < 2) return "לא משהו בכלל...";
+            if (s <= 1) return ""; // הודעה ספציפית כבר מופיעה ב-Reason
             if (s <= 5) return "אתה צופה בכדורגל אבל כנראה שרק בליגת האלופות.";
             if (s <= 9) return "הליגה האירופית קטנה עליך, יאללה בוא, נוסעים לראות ליגה לאומית.";
             if (s <= 14) return "אתה רוי מקאי, רונאלד דה בור, אגדה הולנדית! בוא לטוונטה נגד ויטסה.";
