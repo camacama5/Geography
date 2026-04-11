@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>אלופי הגאוגרפיה והכדורגל</title>
     <style>
-        :root { --primary-blue: #007bff; --danger-red: #e63946; --success-green: #2ecc71; }
+        :root { --primary-blue: #007bff; --danger-red: #e63946; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
         .hidden { display: none !important; }
         .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; max-width: 600px; width: 90%; }
@@ -16,8 +16,7 @@
         input { padding: 15px; font-size: 22px; width: 80%; border: 3px solid #eee; border-radius: 12px; text-align: center; outline: none; }
         input:focus { border-color: var(--primary-blue); }
         .game-over-title { font-size: 32px; color: var(--danger-red); font-weight: bold; margin-bottom: 15px; }
-        .correct-answer-was { font-size: 20px; color: #555; margin-bottom: 10px; }
-        .rank-msg { font-size: 22px; color: #333; line-height: 1.4; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px; }
+        .rank-msg { font-size: 22px; color: #333; line-height: 1.4; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px; white-space: pre-wrap; }
         .final-score { font-size: 50px; color: var(--primary-blue); font-weight: bold; }
     </style>
 </head>
@@ -31,15 +30,15 @@
 
     <div id="game-screen" class="card hidden">
         <div id="timer">20</div>
-        <div id="difficulty-label">רמה: קלה</div>
+        <div id="difficulty-label"></div>
         <div id="team-name"></div>
         <input type="text" id="answer-input" placeholder="מאיזו מדינה הקבוצה?" autocomplete="off">
         <div id="score-display" style="margin-top:20px; font-weight: bold;">ניקוד: 0</div>
     </div>
 
     <div id="end-screen" class="card hidden">
-        <div class="game-over-title" id="end-reason">נגמר המשחק!</div>
-        <div class="correct-answer-was" id="correct-answer-reveal"></div>
+        <div class="game-over-title" id="end-reason"></div>
+        <div id="correct-answer-reveal" style="margin-bottom: 10px; color: #555;"></div>
         <div class="final-score" id="end-score">0</div>
         <div class="rank-msg" id="end-rank-msg"></div>
         <button class="btn-start" onclick="location.reload()">נסה שוב</button>
@@ -61,8 +60,12 @@
         function getSmartQuestions(level, count) {
             let pool = allQuestions[level].filter(q => !lastUsed.includes(q.team));
             if (pool.length < count) { pool = [...allQuestions[level]]; lastUsed = []; }
-            let shuffled = pool.sort(() => Math.random() - 0.5);
-            return shuffled.slice(0, count);
+            return pool.sort(() => Math.random() - 0.5).slice(0, count);
+        }
+
+        function calculatePoints(index) {
+            const pointsMap = { 0:1, 1:1, 2:3, 3:3, 4:5, 5:5, 6:9, 7:10, 8:12 };
+            return (index in pointsMap) ? pointsMap[index] : 12 + ((index - 8) * 3);
         }
 
         function startGame() {
@@ -70,31 +73,21 @@
             const q2 = getSmartQuestions('medium', 5);
             const q3 = getSmartQuestions('hard', 3);
             currentGameQuestions = [...q1, ...q2, ...q3];
-            
             currentGameQuestions.forEach(q => lastUsed.push(q.team));
-            localStorage.setItem('lastPlayedTeams', JSON.stringify(lastUsed.slice(-30)));
-
+            localStorage.setItem('lastPlayedTeams', JSON.stringify(lastUsed.slice(-40)));
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
             showQuestion();
         }
 
-        function calculatePoints(index) {
-            const pointsMap = { 0:1, 1:1, 2:3, 3:3, 4:5, 5:5, 6:9, 7:10, 8:12 };
-            if (index in pointsMap) return pointsMap[index];
-            return 12 + ((index - 8) * 3); // כל שאלה מעבר ל-9 מוסיפה 3 נקודות
-        }
-
         function showQuestion() {
-            if (currentIndex >= currentGameQuestions.length) { gameOver("ניצחת את כל המשחק!"); return; }
+            if (currentIndex >= currentGameQuestions.length) { gameOver("ניצחת את המשחק!"); return; }
             const q = currentGameQuestions[currentIndex];
             document.getElementById('team-name').innerText = q.team;
-            const input = document.getElementById('answer-input');
-            input.value = ""; input.focus();
-
-            let time = currentIndex < 6 ? 20 : (currentIndex < 11 ? 15 : 10);
+            document.getElementById('answer-input').value = "";
+            document.getElementById('answer-input').focus();
             document.getElementById('difficulty-label').innerText = `שאלה ${currentIndex + 1} | שווי: ${calculatePoints(currentIndex)} נק'`;
-            startTimer(time);
+            startTimer(currentIndex < 6 ? 20 : (currentIndex < 11 ? 15 : 10));
         }
 
         function startTimer(time) {
@@ -109,25 +102,11 @@
         }
 
         document.getElementById('answer-input').addEventListener('input', (e) => {
-            const userAnswer = e.target.value.trim();
-            const correctAnswer = currentGameQuestions[currentIndex].country;
-            
-            if (userAnswer === correctAnswer) {
+            if (e.target.value.trim() === currentGameQuestions[currentIndex].country) {
                 score += calculatePoints(currentIndex);
                 document.getElementById('score-display').innerText = "ניקוד: " + score;
                 currentIndex++;
-                setTimeout(showQuestion, 200); // השהייה קלה למעבר חלק
-            }
-        });
-
-        // למקרה שהמשתמש לוחץ Enter בטעות עם תשובה לא נכונה
-        document.getElementById('answer-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const userAnswer = e.target.value.trim();
-                const correctAnswer = currentGameQuestions[currentIndex].country;
-                if (userAnswer !== correctAnswer) {
-                    gameOver(currentIndex === 0 ? "לא טוב דודו, תמחק!" : "טעות!");
-                }
+                setTimeout(showQuestion, 200);
             }
         });
 
@@ -136,23 +115,23 @@
             const q = currentGameQuestions[currentIndex];
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('end-screen').classList.remove('hidden');
-            
-            document.getElementById('end-reason').innerText = reason;
+            document.getElementById('end-reason').innerText = (currentIndex === 0 && reason !== "נגמר הזמן!") ? "לא טוב דודו, תמחק!" : reason;
             document.getElementById('correct-answer-reveal').innerText = q ? `המדינה הנכונה הייתה: ${q.country}` : "";
             document.getElementById('end-score').innerText = score;
             document.getElementById('end-rank-msg').innerText = getRankMessage(score);
         }
 
         function getRankMessage(s) {
-            if (s <= 1) return ""; // הודעה ספציפית כבר מופיעה ב-Reason
-            if (s <= 5) return "אתה צופה בכדורגל אבל כנראה שרק בליגת האלופות.";
-            if (s <= 9) return "הליגה האירופית קטנה עליך, יאללה בוא, נוסעים לראות ליגה לאומית.";
-            if (s <= 14) return "אתה רוי מקאי, רונאלד דה בור, אגדה הולנדית! בוא לטוונטה נגד ויטסה.";
-            if (s <= 19) return "אתה אגדת כדורגל! תיירי הנרי ודל פיירו רוצים ממך טיפים.";
-            if (s <= 25) return "אתה רונלדו השמן לפני שהיה כריסטיאנו, אתה דודו אווט בלה ליגה!";
-            if (s <= 35) return "אתה הפועל תל אביב בגביע אופ\"א - עברת הכל!";
-            if (s <= 45) return "הכל היה סטאם, יאפ סטאם.";
-            return "הדחת קבוצה מאיסלנד ממוקדמות הליגה האזורית!";
+            if (currentIndex === 0 && score === 0) return ""; 
+            if (s >= 2 && s <= 5) return "אתה צופה בכדורגל אבל כנראה שרק בליגת האלופות.";
+            if (s > 5 && s <= 9) return "הליגה האירופית קטנה עליך,יאללה בוא, נוסעים לראות ליגה לאומית.";
+            if (s > 9 && s <= 14) return "אתה רוי מקאי, אתה רונאלד דה בור, אתה אגדה הולנדית של שנות ה-2000, בוא זריז יש משחק של טוונטה נגד  ויטסה.";
+            if (s > 14 && s <= 19) return "אתה אגדת כדורגל אירופית, אתה אורח כבוד אצל תיירי הנרי ודל פיירו רוצה ממך טיפים, אתה פאגינג גאון.";
+            if (s > 19 && s <= 30) return "אתה אגדה חייה, אתה רונלדו השמן לפני שהיה כריסטיאנו, את דודו אווט בלה ליגה ואתה בלתי נגמר.";
+            if (s > 30 && s <= 40) return "אתה הפועל תל אביב בגביע אופ\"א עברת כל כך הרבה שאף אחד כבר לא יודע אם הירבה הבאה קיימת.";
+            if (s > 40 && s <= 59) return "בטח אתה אומר שהכל היה סטאם, יאפ סטאם.";
+            if (s >= 60 && s <= 90) return "אתה כל כך גדול שהדחת קבוצה מאיסלנד ממוקדמות הליגה האזורית.";
+            return "";
         }
     </script>
 </body>
