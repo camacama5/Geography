@@ -8,23 +8,26 @@
         :root { --primary-blue: #007bff; --danger-red: #e63946; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
         .hidden { display: none !important; }
-        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; max-width: 600px; width: 90%; }
+        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; max-width: 650px; width: 95%; }
+        
+        /* כותרת ראשית אחידה */
+        h1 { font-size: 28px; line-height: 1.4; margin-bottom: 20px; }
+        
         .btn-start { background: var(--primary-blue); color: white; padding: 20px 40px; font-size: 24px; font-weight: bold; border: none; border-radius: 15px; cursor: pointer; transition: 0.3s; margin-top: 20px; }
         .btn-start:hover { transform: scale(1.05); background: #0056b3; }
         #timer { font-size: 48px; color: var(--danger-red); font-weight: bold; margin-bottom: 10px; }
         #team-name { font-size: 42px; margin: 25px 0; color: #1a1a1a; }
         input { padding: 15px; font-size: 22px; width: 80%; border: 3px solid #eee; border-radius: 12px; text-align: center; outline: none; }
         input:focus { border-color: var(--primary-blue); }
-        .game-over-title { font-size: 32px; color: var(--danger-red); font-weight: bold; margin-bottom: 15px; }
-        .rank-msg { font-size: 22px; color: #333; line-height: 1.4; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px; white-space: pre-wrap; }
+        .game-over-title { font-size: 36px; color: var(--danger-red); font-weight: bold; margin-bottom: 15px; }
+        .rank-msg { font-size: 22px; color: #333; line-height: 1.4; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px; }
         .final-score { font-size: 50px; color: var(--primary-blue); font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="start-screen" class="card">
-        <h1>תמיד אמרו לכם שכדורגל לא יעזור לכם בחיים?</h1>
-        <h3>שלשחק פיפא זה בזבוז זמן? בואו להוכיח שאתם אלופים בגאוגרפיה!</h3>
+        <h1>תמיד אמרו לכם שכדורגל לא יעזור לכם בחיים? שלשחק פיפא זה בזבוז זמן? בואו להוכיח שאתם אלופים בגאוגרפיה!</h1>
         <button class="btn-start" onclick="startGame()">התחל במשחק</button>
     </div>
 
@@ -38,7 +41,7 @@
 
     <div id="end-screen" class="card hidden">
         <div class="game-over-title" id="end-reason"></div>
-        <div id="correct-answer-reveal" style="margin-bottom: 10px; color: #555;"></div>
+        <div id="correct-answer-reveal" style="margin-bottom: 10px; color: #555; font-size: 20px;"></div>
         <div class="final-score" id="end-score">0</div>
         <div class="rank-msg" id="end-rank-msg"></div>
         <button class="btn-start" onclick="location.reload()">נסה שוב</button>
@@ -115,14 +118,21 @@
             const q = currentGameQuestions[currentIndex];
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('end-screen').classList.remove('hidden');
-            document.getElementById('end-reason').innerText = (currentIndex === 0 && reason !== "נגמר הזמן!") ? "לא טוב דודו, תמחק!" : reason;
+            
+            // תיקון לוגיקת "לא טוב דודו"
+            if (currentIndex === 0 && reason !== "נגמר הזמן!") {
+                document.getElementById('end-reason').innerText = "לא טוב דודו, תמחק!";
+            } else {
+                document.getElementById('end-reason').innerText = reason;
+            }
+
             document.getElementById('correct-answer-reveal').innerText = q ? `המדינה הנכונה הייתה: ${q.country}` : "";
             document.getElementById('end-score').innerText = score;
             document.getElementById('end-rank-msg').innerText = getRankMessage(score);
         }
 
         function getRankMessage(s) {
-            if (currentIndex === 0 && score === 0) return ""; 
+            if (currentIndex === 0) return ""; 
             if (s >= 2 && s <= 5) return "אתה צופה בכדורגל אבל כנראה שרק בליגת האלופות.";
             if (s > 5 && s <= 9) return "הליגה האירופית קטנה עליך,יאללה בוא, נוסעים לראות ליגה לאומית.";
             if (s > 9 && s <= 14) return "אתה רוי מקאי, אתה רונאלד דה בור, אתה אגדה הולנדית של שנות ה-2000, בוא זריז יש משחק של טוונטה נגד  ויטסה.";
