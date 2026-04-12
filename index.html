@@ -237,27 +237,7 @@ function loadLeaderboard() {
         snapshot.forEach(child => { scores.push(child.val()); });
         scores.sort((a, b) => b.score - a.score);
         scores.forEach(entry => {
-            rows += `<tr>
-                <td style="padding:8px; border:1px solid #ddd;">${entry.name}</td>
-                <td style="padding:8px; border:1px solid #ddd;">${entry.score}</td>
-            </tr>`;
-        });
-        document.getElementById('table-body').innerHTML = rows;
-        document.getElementById('leaderboard-status').classList.add('hidden');
-        document.getElementById('table-container').classList.remove('hidden');
-    });
-}
-    
-    }
-}
-    </script>
-    <!-- חלק חדש: טבלת מנצחים -->
-<div id="leaderboard-section" class="card hidden" style="width: 95%; max-width: 750px; margin: 20px auto;">
-
-    <h2 style="color: var(--primary-blue);">טבלת המשחק</h2>
-    <p id="leaderboard-status">טוען נתונים...</p>
-    
-    <div id="save-score-container">
+            
         <input type="text" id="player-name" placeholder="הכנס שם לטבלה" style="width: 60%; margin-bottom: 10px;">
         <button class="btn-start" onclick="submitScore()" style="padding: 10px 20px; font-size: 18px;">שמור ניקוד</button>
     </div>
