@@ -120,7 +120,7 @@
         }
 
         function showQuestion() {
-            if (currentIndex >= currentGameQuestions.length) { isFinished = true; gameOver("הגעת לסוף!"); return; }
+            if (currentIndex >= currentGameQuestions.length) { isFinished = true; gameOver("הגעת לסוף!");activateLeaderboard(); return; }
             const q = currentGameQuestions[currentIndex];
             document.getElementById('team-name').innerText = q.team;
             const cleanA = q.country.replace(/[\s\']+/g, '');
@@ -140,7 +140,7 @@
             timerInterval = setInterval(() => {
                 timeLeft--;
                 document.getElementById('timer').innerText = timeLeft;
-                if (timeLeft <= 0) gameOver("נגמר הזמן!");
+                if (timeLeft <= 0) { gameOver("נגמר הזמן!"); activateLeaderboard(); }
             }, 1000);
         }
 
@@ -161,6 +161,8 @@
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('end-screen').classList.remove('hidden');
             if (isFinished) playWinGame();
+                activateLeaderboard();
+
             else if (currentIndex < 6) playEpicFail();
             else playFailGeneral();
             
