@@ -66,21 +66,23 @@
     </div>
 
     <script>
-        // 2. הגדרות החיבור לפיירבייס (חייב להחליף בפרטים שלך)
+        // חיבור לפיירבייס - מוגדר פעם אחת בלבד!
         const firebaseConfig = {
-            apiKey: "העתק-מפיירבייס",
-            authDomain: "העתק-מפיירבייס",
+            apiKey: "AIzaSyC3sU5gDuuxW5IFWebIAvm52-RCF7L2tCk",
             databaseURL: "https://geography-football-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "העתק-מפיירבייס",
-            storageBucket: "העתק-מפיירבייס",
-            messagingSenderId: "העתק-מפיירבייס",
-            appId: "העתק-מפיירבייס"
+            authDomain: "geography-football.firebaseapp.com",
+            projectId: "geography-football",
+            storageBucket: "geography-football.firebasestorage.app",
+            messagingSenderId: "213487524504",
+            appId: "1:213487524504:web:7d14f5a0a73b92a3024eed",
+            measurementId: "G-M3EQDDNEEZ"
         };
 
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const database = firebase.database();
 
-        // שאר הקוד שלך...
         const allQuestions = {
             easy: [
                 {team:"שאלקה 04",country:"גרמניה"},{team:"ברוסיה דורטמונד",country:"גרמניה"},{team:"שטרום גראץ",country:"אוסטריה"},{team:"אטאלנטה",country:"איטליה"},{team:"אסוציאציונה ספורטיבה בארי",country:"איטליה"},{team:"פארמה קאלצ'יו 1913",country:"איטליה"},{team:"אסטון וילה",country:"אנגליה"},{team:"וולברהמפטון וונדררס",country:"אנגליה"},{team:"קריסטל פאלאס",country:"אנגליה"},{team:"מכלן",country:"בלגיה"},{team:"גנק",country:"בלגיה"},{team:"רויאל אוניון סן-ז'ילואז",country:"בלגיה"},{team:"סטנדרד לייז'",country:"בלגיה"},{team:"קלאב ברוז'",country:"בלגיה"},{team:"א.ז. אלקמאר",country:"הולנד"},{team:"חרונינגן",country:"הולנד"},{team:"רודה",country:"הולנד"},{team:"דה חראפסחאפ",country:"הולנד"},{team:"ניימכן",country:"הולנד"},{team:"פנאתינאיקוס",country:"יוון"},{team:"אולימפיאקוס",country:"יוון"},{team:"ריו אבה",country:"פורטוגל"},{team:"ספורטינג בראגה",country:"פורטוגל"},{team:"פורטו",country:"פורטוגל"},{team:"אולימפיק גימנסטי קלוב ניס",country:"צרפת"},{team:"ליל – מועדון לספורט אולימפי",country:"צרפת"},{team:"נאנט",country:"צרפת"},{team:"פושקש אקדמיה",country:"הונגריה"},{team:"פרנצווארוש",country:"הונגריה"},{team:"רוזנבורג",country:"נורווגיה"},{team:"מולדה",country:"נורווגיה"},{team:"בודה/גלימט",country:"נורווגיה"},{team:"פנרבחצ'ה",country:"טורקיה"},{team:"אנטליהספור",country:"טורקיה"},{team:"פ.צ. קופנהגן",country:"דנמרק"},{team:"ארמיניה בילפלד",country:"גרמניה"},{team:"לך פוזנן",country:"פולין"},
@@ -212,21 +214,7 @@
             if (s >= 1 && s <= 5) return "אתה צופה בכדורגל אבל כנראה שרק בליגת האלופות.";
             return "יפה מאוד, יש לך ידע רחב!";
         }
-const firebaseConfig = {
-  apiKey: "AIzaSyC3sU5gDuuxW5IFWebIAvm52-RCF7L2tCk",
-  databaseURL: "https://geography-football-default-rtdb.europe-west1.firebasedatabase.app",
-  authDomain: "geography-football.firebaseapp.com",
-  projectId: "geography-football",
-  storageBucket: "geography-football.firebasestorage.app",
-  messagingSenderId: "213487524504",
-  appId: "1:213487524504:web:7d14f5a0a73b92a3024eed",
-  measurementId: "G-M3EQDDNEEZ"
-};
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
 
-
-        
         // --- פונקציית שליחת התוצאה ל-Realtime Database ---
         function submitScore() {
             const name = document.getElementById("player-name-input").value.trim();
@@ -237,11 +225,9 @@ const database = firebase.database();
                 return;
             }
 
-            // נטרול הכפתור כדי למנוע לחיצות כפולות
             btn.disabled = true;
             btn.innerText = "שומר...";
 
-            // שמירה ל-Realtime Database
             const leaderboardRef = database.ref('leaderboard');
             const newScoreRef = leaderboardRef.push();
             
@@ -254,7 +240,7 @@ const database = firebase.database();
                 window.location.href = "leaderboard.html";
             })
             .catch((error) => {
-                alert("הייתה בעיה בשמירה לשרת. בדוק את חיבור האינטרנט או את הגדרות ה-Rules בפיירבייס.");
+                alert("הייתה בעיה בשמירה לשרת.");
                 console.error(error);
                 btn.disabled = false;
                 btn.innerText = "שלח תוצאה";
