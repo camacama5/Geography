@@ -210,25 +210,36 @@ function submitScore() {
             name: name,
             score: score,
             date: Date.now()
+               });
+    }
+}
+
+function submitScore() {
+    const nameInput = document.getElementById('player-name');
+    const name = nameInput ? nameInput.value.trim() : "";
+    if (!name) return alert("נא להזין שם כדי להופיע בטבלה");
+
+    if (window.database) {
+        window.database.ref('highscores').push({
+            name: name,
+            score: score,
+            date: Date.now()
         }).then(() => {
-            // העלמה מוחלטת של מסך הסיום המרכזי
+            // מעבר לעמוד חדש ונקי של הטבלה
             const es = document.getElementById('end-screen');
             if (es) es.style.setProperty('display', 'none', 'important');
             
-            // הסתרת תיבת הזנת השם
             const sc = document.getElementById('save-score-container');
             if (sc) sc.style.display = 'none';
 
-            // הצגת הטבלה כעמוד חדש
             const tc = document.getElementById('table-container');
             if (tc) tc.style.display = 'block';
 
             loadLeaderboard();
         });
     }
-}      
+}
 
-// פונקציה שטוענת את התוצאות
 function loadLeaderboard() {
     if (!window.database) return;
     window.database.ref('highscores').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
@@ -237,23 +248,15 @@ function loadLeaderboard() {
         snapshot.forEach(child => { scores.push(child.val()); });
         scores.sort((a, b) => b.score - a.score);
         scores.forEach(entry => {
-            
-        <input type="text" id="player-name" placeholder="הכנס שם לטבלה" style="width: 60%; margin-bottom: 10px;">
-        <button class="btn-start" onclick="submitScore()" style="padding: 10px 20px; font-size: 18px;">שמור ניקוד</button>
-    </div>
-
-    <div id="table-container" class="hidden" style="margin-top: 15px;">
-        <table style="width: 100%; border-collapse: collapse; font-size: 18px;">
-            <thead>
-                <tr style="background: #eee;">
-                    <th style="padding: 10px; border: 1px solid #ddd;">שם</th>
-                    <th style="padding: 10px; border: 1px solid #ddd;">ניקוד</th>
-                </tr>
-            </thead>
-            <tbody id="table-body"></tbody>
-        </table>
-    </div>
-    <button class="btn-start" onclick="location.reload()" style="background: #666; font-size: 18px; padding: 10px; margin-top: 15px;">שחק שוב</button>
-</div>
+            rows += `<tr><td style="padding:8px; border:1px solid #ddd;">${entry.name}</td><td style="padding:8px; border:1px solid #ddd;">${entry.score}</td></tr>`;
+        });
+        const tb = document.getElementById('table-body');
+        if (tb) tb.innerHTML = rows;
+        const st = document.getElementById('leaderboard-status');
+        if (st) st.style.display = 'none';
+    });
+}
+</script>
 </body>
 </html>
+
