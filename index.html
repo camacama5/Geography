@@ -197,12 +197,11 @@
             return "";
         }
     </script>
-  <script type="module">
-  // חיבור לשרתי גוגל - שים לב שהכתובת ארוכה ומלאה!
-  import { initializeApp } from "https://gstatic.com";
-  import { getDatabase, ref, push, set } from "https://gstatic.com";
+ <script src="https://gstatic.com"></script>
+<script src="https://gstatic.com"></script>
 
-  const firebaseConfig = {
+<script>
+  var firebaseConfig = {
     apiKey: "AIzaSyC3sU5gDuuxW5IFWebIAvm52-RCF7L2tcK",
     authDomain: "geography-football.firebaseapp.com",
     projectId: "geography-football",
@@ -211,14 +210,21 @@
     messagingSenderId: "213487524504",
     appId: "1:213487524504:web:7d14f5a0a73b92a3024eed"
   };
+  
+  if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+  }
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  window.saveScore = function(n, s, t, c) {
-    set(push(ref(db, 'leaderboard')), {
-      playerName: n, score: s, team: t, comeback: c, date: new Date().toLocaleString('he-IL')
-    }).then(() => alert("נשמר בטבלת השיאים!"));
+  window.saveScore = function(name, score, team, isComeback) {
+    firebase.database().ref('leaderboard').push({
+      playerName: name,
+      score: score,
+      team: team,
+      comeback: isComeback,
+      date: new Date().toLocaleString('he-IL')
+    }).then(function() {
+      alert("נשמר בטבלת השיאים!");
+    });
   };
 </script>
 </body>
