@@ -172,7 +172,6 @@
             document.getElementById('correct-answer-reveal').innerText = (q && !isFinished) ? `המדינה הנכונה הייתה: ${q.country}` : "";
             document.getElementById('end-score').innerText = score;
             document.getElementById('end-rank-msg').innerText = getRankMessage(score);
-            activateLeaderboard();
         }
 
         function getRankMessage(s) {
@@ -189,74 +188,6 @@
             if (s > 90) return "אתה דודו דהן, אתה אייל לחמן, אתה אדם שיודע מי משחק בליגה הקזחית השנייה. אתה סגן אלוף המשחק (למה סגן אתה שואל?, כי לא הגעת לנק' הסיום!!!!)";
             return "";
         }
-        // פונקציה להצגת הטבלה בסיום המשחק
-function activateLeaderboard() {
-    const lb = document.getElementById('leaderboard-section');
-    if (lb) {
-        lb.classList.remove('hidden');
-        loadLeaderboard(); 
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    }
-}
-
-// פונקציה לשמירת השם והניקוד
-function submitScore() {
-    const nameInput = document.getElementById('player-name');
-    const name = nameInput ? nameInput.value.trim() : "";
-    if (!name) return alert("נא להזין שם כדי להופיע בטבלה");
-
-    if (window.database) {
-        window.database.ref('highscores').push({
-            name: name,
-            score: score,
-            date: Date.now()
-               });
-    }
-}
-
-function submitScore() {
-    const nameInput = document.getElementById('player-name');
-    const name = nameInput ? nameInput.value.trim() : "";
-    if (!name) return alert("נא להזין שם כדי להופיע בטבלה");
-
-    if (window.database) {
-        window.database.ref('highscores').push({
-            name: name,
-            score: score,
-            date: Date.now()
-        }).then(() => {
-            // מעבר לעמוד חדש ונקי של הטבלה
-            const es = document.getElementById('end-screen');
-            if (es) es.style.setProperty('display', 'none', 'important');
-            
-            const sc = document.getElementById('save-score-container');
-            if (sc) sc.style.display = 'none';
-
-            const tc = document.getElementById('table-container');
-            if (tc) tc.style.display = 'block';
-
-            loadLeaderboard();
-        });
-    }
-}
-
-function loadLeaderboard() {
-    if (!window.database) return;
-    window.database.ref('highscores').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
-        let rows = '';
-        let scores = [];
-        snapshot.forEach(child => { scores.push(child.val()); });
-        scores.sort((a, b) => b.score - a.score);
-        scores.forEach(entry => {
-            rows += `<tr><td style="padding:8px; border:1px solid #ddd;">${entry.name}</td><td style="padding:8px; border:1px solid #ddd;">${entry.score}</td></tr>`;
-        });
-        const tb = document.getElementById('table-body');
-        if (tb) tb.innerHTML = rows;
-        const st = document.getElementById('leaderboard-status');
-        if (st) st.style.display = 'none';
-    });
-}
-</script>
+    </script>
 </body>
 </html>
-
