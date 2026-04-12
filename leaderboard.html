@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>טבלת אלופים - גאוגרפיה וכדורגל</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 600px; width: 100%; text-align: center; }
+        h1 { color: #007bff; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 18px; }
+        th, td { padding: 15px; border-bottom: 1px solid #eee; text-align: center; }
+        th { background: #007bff; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .btn { display: inline-block; margin-top: 25px; padding: 15px 30px; background: #007bff; color: white; text-decoration: none; border-radius: 12px; font-weight: bold; transition: 0.3s; }
+        .btn:hover { background: #0056b3; transform: scale(1.05); }
+        #loading { font-size: 20px; color: #666; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>🏆 טבלת האלופים</h1>
+        
+        <div id="loading">טוען נתונים...</div>
+        
+        <table id="leaderboard-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th>מקום</th>
+                    <th>שם האלוף</th>
+                    <th>ניקוד</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                </tbody>
+        </table>
+
+        <a href="index.html" class="btn">חזור למשחק</a>
+    </div>
+
+    <script>
+        // הגדרות הפיירבייס שלך
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3sU5gDuuxW5IFWebIAvm52-RCF7L2tCk",
+            databaseURL: "https://geography-football-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "geography-football",
+            appId: "1:213487524504:web:7d14f5a0a73b92a3024eed"
+        };
+
+        // אתחול פיירבייס
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // משיכת הנתונים מהטבלה
+        const leaderboardBody = document.getElementById('leaderboard-body');
+        const loadingDiv = document.getElementById('loading');
+        const table = document.getElementById('leaderboard-table');
+
+        database.ref('leaderboard').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
+            let scores = [];
+            snapshot.forEach((childSnapshot) => {
+                scores.push(childSnapshot.val());
+            });
+
+            // סידור מהגבוה לנמוך
+            scores.sort((a, b) => b.score - a.score);
+
+            loadingDiv.style.display = 'none';
+            table.style.display = 'table';
+
+            leaderboardBody.innerHTML = "";
+            scores.forEach((entry, index) => {
+                const row = `<tr>
+                    <td>${index + 1}</td>
+                    <td>${entry.name}</td>
+                    <td><b>${entry.score}</b></td>
+                </tr>`;
+                leaderboardBody.innerHTML += row;
+            });
+        }).catch((error) => {
+            loadingDiv.innerText = "שגיאה בטעינת הנתונים. וודא שהגדרת את ה-Rules בפיירבייס ל-true.";
+            console.error(error);
+        });
+    </script>
+</body>
+</html>
