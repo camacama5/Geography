@@ -189,5 +189,39 @@
             return "";
         }
     </script>
+    <!-- חיבור ל-Firebase וניהול טבלת שיאים -->
+<script type="module">
+  import { initializeApp } from "https://gstatic.com";
+  import { getDatabase, ref, push, set, onValue, query, orderByChild, limitToLast } from "https://gstatic.com";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC3sU5gDuuxW5IFWebIAvm52-RCF7L2tcK",
+    authDomain: "://firebaseapp.com",
+    projectId: "geography-football",
+    databaseURL: "https://firebasedatabase.app", 
+    storageBucket: "geography-football.firebasestorage.app",
+    messagingSenderId: "213487524504",
+    appId: "1:213487524504:web:7d14f5a0a73b92a3024eed"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // פונקציה לשמירת תוצאה (אנחנו נקרא לה בסיום המשחק)
+  window.saveScore = function(name, score, team, isComeback) {
+    const gamesRef = ref(db, 'leaderboard');
+    const newGameRef = push(gamesRef);
+    set(newGameRef, {
+      playerName: name,
+      score: score,
+      team: team,
+      comeback: isComeback,
+      date: new Date().toLocaleString('he-IL')
+    }).then(() => {
+      alert("התוצאה נשמרה בטבלת השיאים!");
+    });
+  };
+</script>
+
 </body>
 </html>
