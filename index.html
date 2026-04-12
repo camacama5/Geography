@@ -215,8 +215,7 @@ function submitScore() {
             document.getElementById('table-container').classList.remove('hidden');
             loadLeaderboard();
         });
-    } else {
-        alert("שגיאה: החיבור לטבלת המנצחים לא פעיל");
+    } else {     
     }
 }
 
@@ -242,8 +241,8 @@ function loadLeaderboard() {
 
     </script>
     <!-- חלק חדש: טבלת מנצחים -->
-<div id="leaderboard-section" class="card hidden" style="margin-top: 20px; border: 3px solid var(--primary-blue);">
-    <h2 style="color: var(--primary-blue);">🏆 טבלת 10 הגדולים</h2>
+<div id="leaderboard-section" class="card hidden" 
+    <h2 style="color: var(--primary-blue);">טבלת המשחק</h2>
     <p id="leaderboard-status">טוען נתונים...</p>
     
     <div id="save-score-container">
