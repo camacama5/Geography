@@ -14,6 +14,7 @@
         .btn-start:hover { transform: scale(1.05); background: #0056b3; }
         #timer { font-size: 48px; color: var(--danger-red); font-weight: bold; margin-bottom: 10px; }
         #difficulty-label { font-size: 20px; font-weight: bold; color: #555; margin-bottom: 5px; border-bottom: 2px solid #eee; display: inline-block; padding-bottom: 5px; }
+        #team-logo { height: 100px; margin-bottom: 15px; object-fit: contain; display: block; margin-left: auto; margin-right: auto; }
         #team-name { font-size: 38px; margin: 15px 0 5px 0; color: #1a1a1a; line-height: 1.2; }
         #letter-hint { font-size: 20px; color: #888; margin-bottom: 20px; font-weight: bold; }
         input { padding: 15px; font-size: 24px; width: 80%; border: 3px solid #eee; border-radius: 12px; text-align: center; outline: none; }
@@ -33,6 +34,7 @@
     <div id="game-screen" class="card hidden">
         <div id="timer">20</div>
         <div id="difficulty-label"></div>
+        <img id="team-logo" src="" alt="" class="hidden">
         <div id="team-name"></div>
         <div id="letter-hint"></div>
         <input type="text" id="answer-input" placeholder="מאיזו מדינה הקבוצה?" autocomplete="off">
@@ -58,8 +60,29 @@
                 {team:"קאיראט אלמטי",country:"קזחסטן"},{team:"ריאל ואיאדוליד קלוב דה פוטבול",country:"ספרד"},{team:"דפורטיבו אלאבס",country:"ספרד"},{team:"קרבאך פוטבול קלאב",country:"אזרבייג'ן"},{team:"דנדי יונייטד",country:"סקוטלנד"},{team:"פוליסיה ז'יטומיר",country:"אוקראינה"},{team:"אולימפיה ליובליאנה",country:"סלובניה"},{team:"בְּרוֹנְדְבִּי אידראטספוינין",country:"דנמרק"},{team:"פיורנטינה",country:"איטליה"},{team:"מועדון הכדורגל ז'ירונה",country:"ספרד"},{team:"אלצ'ה",country:"ספרד"}
             ],
             hard: [
-                {team:"דונקסטר רוברס",country:"אנגליה"},{team:"פורט וייל",country:"אנגליה"},{team:"ויקם וונדררס",country:"אנגליה"},{team:"זולטה ורכם",country:"בלגיה"},{team:"דנדר",country:"בלגיה"},{team:"הלמונד ספורט",country:"הולנד"},{team:"פ.צ אמן",country:"הולנד"},{team:"קיפסיה",country:"יוון"},{team:"לבדיאקוס",country:"יוון"},{team:"סנטה קלרה",country:"פורטוגל"},{team:"רודז",country:"צרפת"},{team:"אינטר טורקו",country:"פינלנד"},{team:"האמארקאמארטנה",country:"נורווגיה"},{team:"גנצ'לרבירלי",country:"טורקיה"},{team:"פרויסן מינסטר",country:"גרמניה"},{team:"הפנרפיירדיר",country:"איסלנד"},{team:"קורונה קיילצה",country:"פולין"},
-                {team:"פ.צ. ואדוץ",country:"ליכטנשטיין"},{team:"מועדון הכדורגל אוניברסיטת קראיובה",country:"רומניה"},{team:"שמרוק רוברס",country:"אירלנד"},{team:"טורפדו כותאיסי",country:"גאורגיה"},{team:"אוניון דפורטיבו אלמריה",country:"ספרד"},{team:"מועדון הכדורגל אלמיירה סיטי",country:"הולנד"},{team:"אלבסטה באלומפיה",country:"ספרד"},{team:"קולטורל ודפורטיבה לאונסה",country:"ספרד"},{team:"דפורטיבו מיראנדס",country:"ספרד"},{team:"סוסיאדד דפורטיבה וֶסְקָה",country:"ספרד"}
+                { team: "דונקסטר רוברס", country: "אנגליה", logo: "https://wikimedia.org" },
+                { team: "פורט וייל", country: "אנגליה", logo: "https://wikimedia.org" },
+                { team: "ויקם וונדררס", country: "אנגליה", logo: "https://wikimedia.org" },
+                { team: "זולטה ורכם", country: "בלגיה", logo: "https://wikimedia.org" },
+                { team: "דנדר", country: "בלגיה", logo: "https://wikimedia.org" },
+                { team: "הלמונד ספורט", country: "הולנד", logo: "https://wikimedia.org" },
+                { team: "פ.צ אמן", country: "הולנד", logo: "https://wikimedia.org" },
+                { team: "לבדיאקוס", country: "יוון", logo: "https://wikimedia.org" },
+                { team: "סנטה קלרה", country: "פורטוגל", logo: "https://wikimedia.org" },
+                { team: "רודז", country: "צרפת", logo: "https://wikimedia.org" },
+                { team: "אינטר טורקו", country: "פינלנד", logo: "https://wikimedia.org" },
+                { team: "האמארקאמארטנה", country: "נורווגיה", logo: "https://wikimedia.org" },
+                { team: "גנצ'לרבירלי", country: "טורקיה", logo: "https://wikimedia.org" },
+                { team: "פרויסן מינסטר", country: "גרמניה", logo: "https://wikimedia.org" },
+                { team: "הפנרפיירדיר", country: "איסלנד", logo: "https://wikimedia.org" },
+                { team: "פ.צ. ואדוץ", country: "ליכטנשטיין", logo: "https://wikimedia.org" },
+                { team: "מועדון הכדורגל אוניברסיטת קראיובה", country: "רומניה", logo: "https://wikimedia.org" },
+                { team: "שמרוק רוברס", country: "אירלנד", logo: "https://wikimedia.org" },
+                { team: "טורפדו כותאיסי", country: "גאורגיה", logo: "https://wikimedia.org" },
+                { team: "אוניון דפורטיבו אלמריה", country: "ספרד", logo: "https://wikimedia.org" },
+                { team: "מועדון הכדורגל אלמיירה סיטי", country: "הולנד", logo: "https://wikimedia.org" },
+                { team: "אלבסטה באלומפיה", country: "ספרד" }, { team: "קולטורל ודפורטיבה לאונסה", country: "ספרד" },
+                { team: "דפורטיבו מיראנדס", country: "ספרד" }, { team: "סוסיאדד דפורטיבה וֶסְקָה", country: "ספרד" }
             ]
         };
 
@@ -85,7 +108,11 @@
         function playSuccess() { playTone(600, 'sine', 0.2); }
         function playFailGeneral() { playTone(200, 'sawtooth', 0.6); setTimeout(() => playTone(150, 'sawtooth', 0.6), 150); }
         function playEpicFail() { playTone(100, 'square', 1, 0.15); playTone(110, 'square', 1, 0.1); }
-        function playWinGame() { [523, 659, 783, 1046].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.6), i * 150)); }
+        function playWinGame() {.forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.6), i * 150)); }
+
+        function cleanText(text) {
+            return text.replace(/['’]/g, '').trim();
+        }
 
         function getSmartQuestions(level, count) {
             let pool = allQuestions[level].filter(q => !lastUsed.includes(q.team));
@@ -115,6 +142,15 @@
             if (currentIndex >= currentGameQuestions.length) { isFinished = true; gameOver("הגעת לסוף!"); return; }
             const q = currentGameQuestions[currentIndex];
             document.getElementById('team-name').innerText = q.team;
+            
+            const logoEl = document.getElementById('team-logo');
+            if (q.logo) {
+                logoEl.src = q.logo;
+                logoEl.classList.remove('hidden');
+            } else {
+                logoEl.classList.add('hidden');
+            }
+
             const cleanA = q.country.replace(/[\s\']+/g, '');
             document.getElementById('letter-hint').innerText = `(${cleanA.length} אותיות)`;
             document.getElementById('answer-input').value = "";
@@ -137,7 +173,9 @@
         }
 
         document.getElementById('answer-input').addEventListener('input', (e) => {
-            if (e.target.value.trim() === currentGameQuestions[currentIndex].country) {
+            const userAnswer = cleanText(e.target.value);
+            const correctAnswer = cleanText(currentGameQuestions[currentIndex].country);
+            if (userAnswer === correctAnswer) {
                 playSuccess();
                 score += calculatePoints(currentIndex);
                 currentIndex++;
@@ -170,7 +208,7 @@
             if (s > 5 && s <= 9) return "הליגה האירופית קטנה עליך,יאללה בוא, נוסעים לראות ליגה לאומית.";
             if (s > 9 && s <= 14) return "אתה רוי מקאי, אתה רונאלד דה בור, אתה אגדה הולנדית של שנות ה-2000, בוא זריז יש משחק של טוונטה נגד ויטסה.";
             if (s > 14 && s <= 19) return "אתה אגדת כדורגל אירופית, אתה אורח כבוד אצל תיירי הנרי ודל פיירו רוצה ממך טיפים, אתה פאגינג גאון.";
-            if (s > 19 && s <= 30) return "אתה אגדה חייה, אתה רונלדו השמן לפני שהיה כריסטיאנו, את דודו אוואט בלה ליגה ואתה בלתי נגמר.";
+            if (s > 19 && s <= 30) return "אתה אגדה חייה, אתה רונאלדו השמן לפני שהיה כריסטיאנו, את דודו אוואט בלה ליגה ואתה בלתי נגמר.";
             if (s > 30 && s <= 40) return "אתה הפועל תל אביב בגביע אופ\"א עברת כל כך הרבה שאף אחד כבר לא יודע אם הירבה הבאה קיימת.";
             if (s > 40 && s <= 59) return "בטח אתה אומר שהכל היה סטאם, יאפ סטאם.";
             if (s >= 60 && s <= 90) return "אתה כל כך גדול שהדחת קבוצה מאיסלנד ממוקדמות הליגה האזורית.";
