@@ -172,6 +172,7 @@
             document.getElementById('correct-answer-reveal').innerText = (q && !isFinished) ? `המדינה הנכונה הייתה: ${q.country}` : "";
             document.getElementById('end-score').innerText = score;
             document.getElementById('end-rank-msg').innerText = getRankMessage(score);
+            activateLeaderboard();
         }
 
         function getRankMessage(s) {
@@ -188,6 +189,80 @@
             if (s > 90) return "אתה דודו דהן, אתה אייל לחמן, אתה אדם שיודע מי משחק בליגה הקזחית השנייה. אתה סגן אלוף המשחק (למה סגן אתה שואל?, כי לא הגעת לנק' הסיום!!!!)";
             return "";
         }
+        // פונקציה להצגת הטבלה בסיום המשחק
+function activateLeaderboard() {
+    const lb = document.getElementById('leaderboard-section');
+    if (lb) {
+        lb.classList.remove('hidden');
+        loadLeaderboard(); 
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+}
+
+// פונקציה לשמירת השם והניקוד
+function submitScore() {
+    const nameInput = document.getElementById('player-name');
+    const name = nameInput ? nameInput.value.trim() : "";
+    if (!name) return alert("נא להזין שם כדי להופיע בטבלה");
+
+    if (window.database) {
+        window.database.ref('highscores').push({
+            name: name,
+            score: score,
+            date: Date.now()
+        }).then(() => {
+            document.getElementById('save-score-container').classList.add('hidden');
+            document.getElementById('table-container').classList.remove('hidden');
+            loadLeaderboard();
+        });
+    } else {
+        alert("שגיאה: החיבור לטבלת המנצחים לא פעיל");
+    }
+}
+
+// פונקציה שטוענת את התוצאות
+function loadLeaderboard() {
+    if (!window.database) return;
+    window.database.ref('highscores').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
+        let rows = '';
+        let scores = [];
+        snapshot.forEach(child => { scores.push(child.val()); });
+        scores.sort((a, b) => b.score - a.score);
+        scores.forEach(entry => {
+            rows += `<tr>
+                <td style="padding:8px; border:1px solid #ddd;">${entry.name}</td>
+                <td style="padding:8px; border:1px solid #ddd;">${entry.score}</td>
+            </tr>`;
+        });
+        document.getElementById('table-body').innerHTML = rows;
+        document.getElementById('leaderboard-status').classList.add('hidden');
+        document.getElementById('table-container').classList.remove('hidden');
+    });
+}
+
     </script>
+    <!-- חלק חדש: טבלת מנצחים -->
+<div id="leaderboard-section" class="card hidden" style="margin-top: 20px; border: 3px solid var(--primary-blue);">
+    <h2 style="color: var(--primary-blue);">🏆 טבלת 10 הגדולים</h2>
+    <p id="leaderboard-status">טוען נתונים...</p>
+    
+    <div id="save-score-container">
+        <input type="text" id="player-name" placeholder="הכנס שם לטבלה" style="width: 60%; margin-bottom: 10px;">
+        <button class="btn-start" onclick="submitScore()" style="padding: 10px 20px; font-size: 18px;">שמור ניקוד</button>
+    </div>
+
+    <div id="table-container" class="hidden" style="margin-top: 15px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 18px;">
+            <thead>
+                <tr style="background: #eee;">
+                    <th style="padding: 10px; border: 1px solid #ddd;">שם</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">ניקוד</th>
+                </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+    <button class="btn-start" onclick="location.reload()" style="background: #666; font-size: 18px; padding: 10px; margin-top: 15px;">שחק שוב</button>
+</div>
 </body>
 </html>
