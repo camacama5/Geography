@@ -211,18 +211,22 @@ function submitScore() {
             score: score,
             date: Date.now()
         }).then(() => {
-            // מעבר לעמוד הטבלה
-            document.getElementById('end-screen').classList.add('hidden');
-            document.getElementById('save-score-container').classList.add('hidden');
-            document.getElementById('table-container').classList.remove('hidden');
+            // העלמה מוחלטת של מסך הסיום המרכזי
+            const es = document.getElementById('end-screen');
+            if (es) es.style.setProperty('display', 'none', 'important');
+            
+            // הסתרת תיבת הזנת השם
+            const sc = document.getElementById('save-score-container');
+            if (sc) sc.style.display = 'none';
+
+            // הצגת הטבלה כעמוד חדש
+            const tc = document.getElementById('table-container');
+            if (tc) tc.style.display = 'block';
+
             loadLeaderboard();
-        });
-    }
-}
-
-
-
-
+        :        });
+:    }
+: }
 
 // פונקציה שטוענת את התוצאות
 function loadLeaderboard() {
