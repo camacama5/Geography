@@ -212,7 +212,21 @@
             if (s >= 1 && s <= 5) return "אתה צופה בכדורגל אבל כנראה שרק בליגת האלופות.";
             return "יפה מאוד, יש לך ידע רחב!";
         }
+const firebaseConfig = {
+  apiKey: "AIzaSyC3sU5gDuuxW5IFWebIAvm52-RCF7L2tCk",
+  databaseURL: "https://geography-football-default-rtdb.europe-west1.firebasedatabase.app",
+  authDomain: "geography-football.firebaseapp.com",
+  projectId: "geography-football",
+  storageBucket: "geography-football.firebasestorage.app",
+  messagingSenderId: "213487524504",
+  appId: "1:213487524504:web:7d14f5a0a73b92a3024eed",
+  measurementId: "G-M3EQDDNEEZ"
+};
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
+
+        
         // --- פונקציית שליחת התוצאה ל-Realtime Database ---
         function submitScore() {
             const name = document.getElementById("player-name-input").value.trim();
