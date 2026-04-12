@@ -197,36 +197,27 @@
             return "";
         }
     </script>
-<script src="https://gstatic.com"></script>
-<script src="https://gstatic.com"></script>
+<script src="https://gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-  var firebaseConfig = {
+  var config = {
     apiKey: "AIzaSyC3sU5gDuuxW5IFWebIAvm52-RCF7L2tcK",
     authDomain: "geography-football.firebaseapp.com",
     projectId: "geography-football",
-    databaseURL: "https://firebasedatabase.app",
+    databaseURL: "https://geography-football-default-rtdb.europe-west1.firebasedatabase.app/",
     storageBucket: "geography-football.firebasestorage.app",
     messagingSenderId: "213487524504",
     appId: "1:213487524504:web:7d14f5a0a73b92a3024eed"
   };
   
-  if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-  }
+ if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-  window.saveScore = function(name, score, team, isComeback) {
+  window.saveScore = function(n, s, t, c) {
     firebase.database().ref('leaderboard').push({
-      playerName: name,
-      score: score,
-      team: team,
-      comeback: isComeback,
-      date: new Date().toLocaleString('he-IL')
-    }).then(function() {
-      alert("נשמר בטבלת השיאים!");
-    });
+      playerName: n, score: s, team: t, comeback: c, date: new Date().toLocaleString('he-IL')
+    }).then(function() { alert("נשמר!"); });
   };
 </script>
 </body>
 </html>
-
