@@ -189,5 +189,70 @@
             return "";
         }
     </script>
+    <script>
+// 1. חיבור ל-Firebase (הצינור)
+const head = document.getElementsByTagName('head')[0];
+const s1 = document.createElement('script');
+const s2 = document.createElement('script');
+const base = "https" + "://" + "www" + ".gstatic" + ".com/firebasejs/9.17.1/";
+s1.src = base + "firebase-app-compat.js";
+s2.src = base + "firebase-database-compat.js";
+head.appendChild(s1);
+head.appendChild(s2);
+
+// 2. הפעלת המערכת
+s2.onload = function() {
+    const config = {
+        apiKey: "AIzaSyC3sU5gDuuxW5IFWebIAvm52-RCF7L2tCk",
+        authDomain: "geography-football" + ".firebaseapp.com",
+        databaseURL: "https" + "://" + "geography-football-default-rtdb" + ".firebaseio.com",
+        projectId: "geography-football"
+    };
+    firebase.initializeApp(config);
+    window.database = firebase.database();
+};
+
+// 3. פונקציה שמראה את הטבלה בסוף המשחק
+function activateLeaderboard() {
+    document.getElementById('leaderboard-section').style.display = 'block';
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+
+// 4. פונקציה ששומרת את השם והניקוד
+function submitScore() {
+    const name = document.getElementById('player-name').value;
+    const finalScore = typeof score !== 'undefined' ? score : 0;
+    
+    if (!name) return alert("נא להזין שם");
+
+    window.database.ref('highscores').push({
+        name: name,
+        score: finalScore,
+        date: Date.now()
+    }).then(() => {
+        document.getElementById('save-score-container').style.display = 'none';
+        document.getElementById('table-container').style.display = 'block';
+        loadLeaderboard();
+    });
+}
+
+// 5. פונקציה שמציגה את טבלת האלופים
+function loadLeaderboard() {
+    window.database.ref('highscores').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
+        let rows = '';
+        let scores = [];
+        snapshot.forEach(child => { scores.push(child.val()); });
+        scores.sort((a, b) => b.score - a.score);
+        scores.forEach(entry => {
+            rows += `<tr>
+                <td style="padding:8px; border:1px solid #ccc;">${entry.name}</td>
+                <td style="padding:8px; border:1px solid #ccc;">${entry.score}</td>
+            </tr>`;
+        });
+        document.getElementById('table-body').innerHTML = rows;
+    });
+}
+</script>
+
 </body>
 </html>
