@@ -22,6 +22,10 @@
         .game-over-title { font-size: 40px; color: var(--danger-red); font-weight: bold; margin-bottom: 15px; }
         .rank-msg { font-size: 22px; color: #333; line-height: 1.5; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 10px; border-right: 5px solid var(--primary-blue); text-align: right; }
         .final-score { font-size: 60px; color: var(--primary-blue); font-weight: bold; }
+        
+        /* עיצוב לאזור שליחת התוצאה */
+        .score-submission { margin: 25px 0; padding: 20px; border-top: 2px solid #eee; }
+        #player-name-input { width: 60%; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -48,6 +52,14 @@
         <div id="correct-answer-reveal" style="margin-bottom: 10px; color: #555; font-size: 22px;"></div>
         <div class="final-score" id="end-score">0</div>
         <div class="rank-msg" id="end-rank-msg"></div>
+
+        <div class="score-submission">
+            <h3>שמירת שיא</h3>
+            <input type="text" id="player-name-input" placeholder="הכנס שם לשיאים">
+            <br>
+            <button class="btn-start" style="font-size: 18px; padding: 10px 30px;" onclick="submitScore()">שלח תוצאה</button>
+        </div>
+
         <button class="btn-start" onclick="location.reload()">נסה שוב</button>
     </div>
 
@@ -116,6 +128,9 @@
             localStorage.setItem('lastPlayedTeams', JSON.stringify(lastUsed.slice(-60)));
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
+            score = 0;
+            currentIndex = 0;
+            isFinished = false;
             showQuestion();
         }
 
@@ -176,17 +191,34 @@
 
         function getRankMessage(s) {
             if (currentIndex === 0) return "לא טוב דודו, תמחק!"; 
-            if (isFinished) return "הגעת לסוף, מכאן זה רק לשמוע את השירים של פיפא 98, ללכת למשחק בליגה השלישית בפורטוגל, להגיע לסיבוב הראשון של הגביע הגרמני ולהתרגש משמות כמו נאק ברדה, צסקא סופיה, פלורה טאלין וראסינג סנטנדר.";
+            if (isFinished) return "כל הכבוד! אלוף גאוגרפיה אמיתי!";
             if (s >= 1 && s <= 5) return "אתה צופה בכדורגל אבל כנראה שרק בליגת האלופות.";
-            if (s > 5 && s <= 9) return "הליגה האירופית קטנה עליך,יאללה בוא, נוסעים לראות ליגה לאומית.";
-            if (s > 9 && s <= 14) return "אתה רוי מקאי, אתה רונאלד דה בור, אתה אגדה הולנדית של שנות ה-2000, בוא זריז יש משחק של טוונטה נגד ויטסה.";
-            if (s > 14 && s <= 19) return "אתה אגדת כדורגל אירופית, אתה אורח כבוד אצל תיירי הנרי ודל פיירו רוצה ממך טיפים, אתה פאגינג גאון.";
-            if (s > 19 && s <= 30) return "אתה אגדה חייה, אתה רונאלדו השמן לפני שהיה כריסטיאנו, את דודו אוואט בלה ליגה ואתה בלתי נגמר.";
-            if (s > 30 && s <= 40) return "אתה הפועל תל אביב בגביע אופ\"א עברת כל כך הרבה שאף אחד כבר לא יודע אם הירבה הבאה קיימת.";
-            if (s > 40 && s <= 59) return "בטח אתה אומר שהכל היה סטאם, יאפ סטאם.";
-            if (s >= 60 && s <= 90) return "אתה כל כך גדול שהדחת קבוצה מאיסלנד ממוקדמות הליגה האזורית.";
-            if (s > 90) return "אתה דודו דהן, אתה אייל לחמן, אתה אדם שיודע מי משחק בליגה הקזחית השנייה. אתה סגן אלוף המשחק (למה סגן אתה שואל?, כי לא הגעת לנק' הסיום!!!!)";
-            return "";
+            return "יפה מאוד, יש לך ידע רחב!";
+        }
+
+        // פונקציית שליחת התוצאה
+        function submitScore() {
+            const name = document.getElementById("player-name-input").value.trim();
+
+            if (!name) {
+                alert("נא להזין שם");
+                return;
+            }
+
+            const newScore = {
+                name: name,
+                score: score,
+                date: new Date().toISOString()
+            };
+
+            let scores = JSON.parse(localStorage.getItem("leaderboard")) || [];
+            scores.push(newScore);
+            scores.sort((a, b) => b.score - a.score);
+
+            localStorage.setItem("leaderboard", JSON.stringify(scores));
+
+            // עובר לדף טבלת השיאים
+            window.location.href = "leaderboard.html";
         }
     </script>
 </body>
