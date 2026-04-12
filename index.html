@@ -202,9 +202,9 @@
   import { initializeApp } from "https://gstatic.com";
   import { getDatabase, ref, push, set, onValue, query, orderByChild, limitToLast } from "https://gstatic.com";
 
-  const firebaseConfig = {
+    const firebaseConfig = {
     apiKey: "AIzaSyC3sU5gDuuxW5IFWebIAvm52-RCF7L2tcK",
-    authDomain: "://firebaseapp.com",
+    authDomain: "geography-football.firebaseapp.com",
     projectId: "geography-football",
     databaseURL: "https://firebasedatabase.app", 
     storageBucket: "geography-football.firebasestorage.app",
@@ -215,7 +215,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // פונקציה לשמירת תוצאה (אנחנו נקרא לה בסיום המשחק)
+  // פונקציה לשמירת תוצאה
   window.saveScore = function(name, score, team, isComeback) {
     const gamesRef = ref(db, 'leaderboard');
     const newGameRef = push(gamesRef);
@@ -227,9 +227,14 @@
       date: new Date().toLocaleString('he-IL')
     }).then(() => {
       alert("התוצאה נשמרה בטבלת השיאים!");
+    }).catch((error) => {
+      console.error("שגיאה בשמירה:", error);
     });
   };
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
