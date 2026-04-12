@@ -189,5 +189,49 @@
             return "";
         }
     </script>
+    <!-- אזור טבלת השיאים - מוסתר כברירת מחדל -->
+<div id="leaderboard-section" style="display: none; margin-top: 20px; padding: 15px; border: 2px solid #000; background: #f9f9f9; text-align: center; font-family: sans-serif;">
+    
+    <!-- שלב 1: הזנת שם -->
+    <div id="save-score-container">
+        <h3>כל הכבוד! הכנס שם לטבלת השיאים:</h3>
+        <input type="text" id="player-name" placeholder="השם שלך..." style="padding: 8px; font-size: 16px;">
+        <button onclick="submitScore()" style="padding: 8px 15px; font-size: 16px; cursor: pointer; background-color: #4CAF50; color: white; border: none;">שמור ציון</button>
+    </div>
+
+    <!-- שלב 2: הטבלה (מוסתרת עד ששומרים שם) -->
+    <div id="table-container" style="display: none;">
+        <h3>טבלת אלופים</h3>
+        <table id="highscores-table" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #ddd;">
+                    <th style="padding: 8px; border: 1px solid #ccc;">שם</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">תוצאה</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- כאן יופיעו הנתונים מ-Firebase בהמשך -->
+            </tbody>
+        </table>
+        <button onclick="location.reload()" style="margin-top: 15px; padding: 10px;">משחק חדש</button>
+    </div>
+</div>
+
+<script>
+// פונקציה שפשוט מציגה את האזור הזה בסיום המשחק
+function activateLeaderboard() {
+    document.getElementById('leaderboard-section').style.display = 'block';
+    // גלילה אוטומטית למטה כדי שהשחקן יראה את זה
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+
+function submitScore() {
+    // כאן נכניס בהמשך את הקוד ששולח ל-Firebase
+    document.getElementById('save-score-container').style.display = 'none';
+    document.getElementById('table-container').style.display = 'block';
+    alert("השם נשמר (כרגע בכאילו עד שנחבר את Firebase)");
+}
+</script>
+
 </body>
 </html>
