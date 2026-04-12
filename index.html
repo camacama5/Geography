@@ -8,19 +8,19 @@
         :root { --primary-blue: #007bff; --danger-red: #e63946; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
         .hidden { display: none !important; }
-        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; max-width: 700px; width: 95%; }
+        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; max-width: 750px; width: 95%; }
         h1 { font-size: 28px; line-height: 1.4; margin-bottom: 20px; }
         .btn-start { background: var(--primary-blue); color: white; padding: 20px 40px; font-size: 24px; font-weight: bold; border: none; border-radius: 15px; cursor: pointer; transition: 0.3s; margin-top: 20px; }
         .btn-start:hover { transform: scale(1.05); background: #0056b3; }
         #timer { font-size: 48px; color: var(--danger-red); font-weight: bold; margin-bottom: 10px; }
         #difficulty-label { font-size: 20px; font-weight: bold; color: #555; margin-bottom: 5px; border-bottom: 2px solid #eee; display: inline-block; padding-bottom: 5px; }
         #team-name { font-size: 42px; margin: 15px 0 5px 0; color: #1a1a1a; }
-        #letter-hint { font-size: 18px; color: #888; margin-bottom: 20px; font-weight: bold; }
-        input { padding: 15px; font-size: 22px; width: 80%; border: 3px solid #eee; border-radius: 12px; text-align: center; outline: none; }
+        #letter-hint { font-size: 20px; color: #888; margin-bottom: 20px; font-weight: bold; }
+        input { padding: 15px; font-size: 24px; width: 80%; border: 3px solid #eee; border-radius: 12px; text-align: center; outline: none; }
         input:focus { border-color: var(--primary-blue); }
-        .game-over-title { font-size: 36px; color: var(--danger-red); font-weight: bold; margin-bottom: 15px; }
-        .rank-msg { font-size: 22px; color: #333; line-height: 1.4; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px; }
-        .final-score { font-size: 50px; color: var(--primary-blue); font-weight: bold; }
+        .game-over-title { font-size: 40px; color: var(--danger-red); font-weight: bold; margin-bottom: 15px; }
+        .rank-msg { font-size: 22px; color: #333; line-height: 1.5; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 10px; border-right: 5px solid var(--primary-blue); }
+        .final-score { font-size: 60px; color: var(--primary-blue); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -34,14 +34,14 @@
         <div id="timer">20</div>
         <div id="difficulty-label"></div>
         <div id="team-name"></div>
-        <div id="letter-hint"></div> <!-- רמז האותיות -->
+        <div id="letter-hint"></div>
         <input type="text" id="answer-input" placeholder="מאיזו מדינה הקבוצה?" autocomplete="off">
-        <div id="score-display" style="margin-top:20px; font-weight: bold;">ניקוד: 0</div>
+        <div id="score-display" style="margin-top:20px; font-weight: bold; font-size: 18px;">ניקוד: 0</div>
     </div>
 
     <div id="end-screen" class="card hidden">
         <div class="game-over-title" id="end-reason"></div>
-        <div id="correct-answer-reveal" style="margin-bottom: 10px; color: #555; font-size: 20px;"></div>
+        <div id="correct-answer-reveal" style="margin-bottom: 10px; color: #555; font-size: 22px;"></div>
         <div class="final-score" id="end-score">0</div>
         <div class="rank-msg" id="end-rank-msg"></div>
         <button class="btn-start" onclick="location.reload()">נסה שוב</button>
@@ -61,22 +61,23 @@
         let timerInterval;
         let isFinished = false;
 
-        // פונקציות סאונד
+        // מנוע סאונד מובנה
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playTone(freq, type, duration) {
+        function playTone(freq, type, duration, vol = 0.1) {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.value = freq;
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
+            osc.type = type; osc.frequency.value = freq;
+            osc.connect(gain); gain.connect(audioCtx.destination);
             osc.start();
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
             osc.stop(audioCtx.currentTime + duration);
         }
 
         function playSuccess() { playTone(600, 'sine', 0.2); }
-        function playFail() { playTone(150, 'triangle', 0.5); }
+        function playFailGeneral() { playTone(200, 'sawtooth', 0.6); setTimeout(() => playTone(150, 'sawtooth', 0.6), 150); }
+        function playEpicFail() { playTone(100, 'square', 1, 0.15); playTone(110, 'square', 1, 0.1); }
+        function playWinGame() { [523, 659, 783, 1046].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.6), i * 150)); }
 
         function getSmartQuestions(level, count) {
             let pool = allQuestions[level].filter(q => !lastUsed.includes(q.team));
@@ -90,6 +91,7 @@
         }
 
         function startGame() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             const q1 = getSmartQuestions('easy', 6);
             const q2 = getSmartQuestions('medium', 5);
             const q3 = getSmartQuestions('hard', 3);
@@ -102,17 +104,12 @@
         }
 
         function showQuestion() {
-            if (currentIndex >= currentGameQuestions.length) { 
-                isFinished = true;
-                gameOver("הגעת לסוף!"); 
-                return; 
-            }
+            if (currentIndex >= currentGameQuestions.length) { isFinished = true; gameOver("הגעת לסוף!"); return; }
             const q = currentGameQuestions[currentIndex];
             document.getElementById('team-name').innerText = q.team;
             
-            // רמז כמות אותיות
-            const cleanAnswer = q.country.replace(/\s/g, ''); // ספירת אותיות ללא רווחים
-            document.getElementById('letter-hint').innerText = `(${cleanAnswer.length} אותיות)`;
+            const cleanA = q.country.replace(/\s/g, '');
+            document.getElementById('letter-hint').innerText = `(${cleanA.length} אותיות)`;
             
             document.getElementById('answer-input').value = "";
             document.getElementById('answer-input').focus();
@@ -131,7 +128,7 @@
             timerInterval = setInterval(() => {
                 timeLeft--;
                 document.getElementById('timer').innerText = timeLeft;
-                if (timeLeft <= 0) { playFail(); gameOver("נגמר הזמן!"); }
+                if (timeLeft <= 0) gameOver("נגמר הזמן!");
             }, 1000);
         }
 
@@ -146,11 +143,14 @@
 
         function gameOver(reason) {
             clearInterval(timerInterval);
-            if (reason !== "הגעת לסוף!" && !isFinished) playFail();
             const q = currentGameQuestions[currentIndex];
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('end-screen').classList.remove('hidden');
             
+            if (isFinished) playWinGame();
+            else if (currentIndex < 6) playEpicFail();
+            else playFailGeneral();
+
             if (currentIndex === 0 && reason !== "נגמר הזמן!") {
                 document.getElementById('end-reason').innerText = "לא טוב דודו, תמחק!";
             } else {
@@ -168,8 +168,8 @@
             if (s >= 2 && s <= 5) return "אתה צופה בכדורגל אבל כנראה שרק בליגת האלופות.";
             if (s > 5 && s <= 9) return "הליגה האירופית קטנה עליך,יאללה בוא, נוסעים לראות ליגה לאומית.";
             if (s > 9 && s <= 14) return "אתה רוי מקאי, אתה רונאלד דה בור, אתה אגדה הולנדית של שנות ה-2000, בוא זריז יש משחק של טוונטה נגד  ויטסה.";
-            if (s > 14 && s <= 19) return "אתה אגדת כדורגל אירופית, אתה אורח כבוד אצל תיירי הנרי ודל פיירו רוצה ממך טיפים, אתה פאגינג גאון.";
-            if (s > 19 && s <= 30) return "אתה אגדה חייה, אתה רונלדו השמן לפני שהיה כריסטיאנו, את דודו אוואט בלה ליגה ואתה בלתי נגמר.";
+            if (s > 14 && s <= 19) return "אתה אגדת כדורגל אירופית, אתה אורח כבוד אצל תיירי הנרי ודל פיירו רוצה ממך טיפים, אתה פאקינג גאון.";
+            if (s > 19 && s <= 30) return "אתה אגדה חייה, אתה רונאלדו השמן לפני שהיה כריסטיאנו, את דודו אוואט בלה ליגה ואתה בלתי נגמר.";
             if (s > 30 && s <= 40) return "אתה הפועל תל אביב בגביע אופ\"א עברת כל כך הרבה קבוצות שאף אחד כבר לא יודע אם הירבה הבאה קיימת.";
             if (s > 40 && s <= 59) return "בטח אתה אומר שהכל היה סטאם, יאפ סטאם.";
             if (s >= 60 && s <= 90) return "אתה כל כך גדול שהדחת קבוצה מאיסלנד ממוקדמות הליגה האזורית.";
