@@ -1,186 +1,142 @@
-<!-- חלק 1: HTML - העיצוב של טבלת המנצחים ומסך הסיום -->
-<div id="leaderboard-section" style="display:none; background: #f9f9f9; border: 3px solid #333; padding: 20px; position: relative; margin: 20px auto; max-width: 500px; text-align: center; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); direction: rtl; font-family: sans-serif;">
-    <h2 id="end-reason-text" style="color: #d9534f; margin-bottom: 10px;"></h2>
-    <p id="rank-message" style="font-weight: bold; font-size: 1.1em; color: #333; margin: 15px 0;"></p>
-    <p style="font-size: 1.2em;">ניקוד סופי: <strong id="final-score-text">0</strong></p>
-    
-    <div id="save-score-container">
-        <input type="text" id="player-name" placeholder="הכנס שם לטבלה" style="padding: 10px; width: 70%; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px;">
-        <button onclick="submitScore()" style="padding: 10px 20px; cursor: pointer; background: #5cb85c; color: white; border: none; border-radius: 5px; font-weight: bold;">שמור ניקוד</button>
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>משחק גאוגרפיה כדורגל</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f0f0f0; }
+        .hidden { display: none; }
+        #game-screen { margin-top: 50px; }
+        input { padding: 10px; font-size: 1.2em; border-radius: 5px; border: 1px solid #ccc; }
+        #timer { font-size: 2em; color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- מסך פתיחה -->
+    <div id="start-screen">
+        <h1>ברוכים הבאים למשחק גאוגרפיה כדורגל!</h1>
+        <button onclick="startGame()" style="padding: 15px 30px; font-size: 1.5em; cursor: pointer;">התחל משחק</button>
     </div>
 
-    <div id="table-container" style="display:none; margin-top: 20px;">
-        <h3 style="border-bottom: 2px solid #333; padding-bottom: 5px;">טבלת 10 הגדולים</h3>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-            <thead>
-                <tr style="background: #eee;">
-                    <th style="padding: 8px; border: 1px solid #ccc;">שם</th>
-                    <th style="padding: 8px; border: 1px solid #ccc;">ניקוד</th>
-                </tr>
-            </thead>
-            <tbody id="table-body"></tbody>
-        </table>
+    <!-- מסך משחק -->
+    <div id="game-screen" class="hidden">
+        <div id="difficulty-label"></div>
+        <div id="score-display"></div>
+        <div id="timer"></div>
+        <h2 id="team-name"></h2>
+        <div id="letter-hint"></div>
+        <input type="text" id="answer-input" placeholder="מאיזו מדינה הקבוצה?">
     </div>
-    
-    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer;">שחק שוב ↻</button>
-</div>
 
-<!-- חלק 2: JavaScript - הלוגיקה של המשחק -->
-<script>
-    let lastUsed = JSON.parse(localStorage.getItem('lastPlayedTeams')) || [];
-    let currentGameQuestions = [];
-    let currentIndex = 0;
-    let score = 0;
-    let timerInterval;
-    let isFinished = false;
+    <!-- מסך סיום וטבלת מנצחים -->
+    <div id="end-screen" class="hidden">
+        <div id="leaderboard-section" style="background: #fff; border: 3px solid #333; padding: 20px; margin: 20px auto; max-width: 500px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <h2 id="end-reason-text" style="color: #d9534f;"></h2>
+            <p id="rank-message" style="font-weight: bold; margin: 15px 0;"></p>
+            <p>ניקוד סופי: <strong id="final-score-text">0</strong></p>
+            
+            <div id="save-score-container">
+                <input type="text" id="player-name" placeholder="הכנס שם לטבלה">
+                <button onclick="submitScore()">שמור ניקוד</button>
+            </div>
 
-    // הגדרות סאונד
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playTone(freq, type, duration, vol = 0.1) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type; osc.frequency.value = freq;
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start();
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-        osc.stop(audioCtx.currentTime + duration);
-    }
+            <div id="table-container" style="display:none; margin-top: 20px;">
+                <h3>טבלת 10 הגדולים</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead><tr style="background: #eee;"><th>שם</th><th>ניקוד</th></tr></thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+            <button onclick="location.reload()" style="margin-top: 20px;">שחק שוב ↻</button>
+        </div>
+    </div>
 
-    function playSuccess() { playTone(600, 'sine', 0.2); }
-    function playFailGeneral() { playTone(200, 'sawtooth', 0.6); setTimeout(() => playTone(150, 'sawtooth', 0.6), 150); }
-    function playEpicFail() { playTone(100, 'square', 1, 0.15); playTone(110, 'square', 1, 0.1); }
-    function playWinGame() { [523, 659, 783, 1046].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.6), i * 150)); }
+    <script>
+        // כל הפונקציות (startGame, showQuestion, וכו')
+        let lastUsed = JSON.parse(localStorage.getItem('lastPlayedTeams')) || [];
+        let currentGameQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let timerInterval;
+        let isFinished = false;
 
-    function cleanText(text) { return text.replace(/['’]/g, '').trim(); }
-
-    function startGame() {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const q1 = getSmartQuestions('easy', 6);
-        const q2 = getSmartQuestions('medium', 5);
-        const q3 = getSmartQuestions('hard', 3);
-        currentGameQuestions = [...q1, ...q2, ...q3];
-        currentGameQuestions.forEach(q => lastUsed.push(q.team));
-        localStorage.setItem('lastPlayedTeams', JSON.stringify(lastUsed.slice(-60)));
-        document.getElementById('start-screen').classList.add('hidden');
-        document.getElementById('game-screen').classList.remove('hidden');
-        showQuestion();
-    }
-
-    function showQuestion() {
-        if (currentIndex >= currentGameQuestions.length) { 
-            isFinished = true; 
-            gameOver("הגעת לסוף!"); 
-            return; 
-        }
-        const q = currentGameQuestions[currentIndex];
-        document.getElementById('team-name').innerText = q.team;
-        const cleanA = q.country.replace(/[\s\']+/g, '');
-        document.getElementById('letter-hint').innerText = `(${cleanA.length} אותיות)`;
-        document.getElementById('answer-input').value = "";
-        document.getElementById('answer-input').focus();
-        let levelText = currentIndex < 6 ? "רמה: קל" : (currentIndex < 11 ? "רמה: בינוני" : "רמה: קשה");
-        document.getElementById('difficulty-label').innerText = levelText;
-        document.getElementById('score-display').innerText = `ניקוד: ${score} | שאלה ${currentIndex + 1} מתוך 14`;
-        startTimer(currentIndex < 6 ? 20 : (currentIndex < 11 ? 15 : 10));
-    }
-
-    function startTimer(time) {
-        clearInterval(timerInterval);
-        let timeLeft = time;
-        document.getElementById('timer').innerText = timeLeft;
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            document.getElementById('timer').innerText = timeLeft;
-            if (timeLeft <= 0) { gameOver("נגמר הזמן!"); }
-        }, 1000);
-    }
-
-    function calculatePoints(index) {
-        const pointsMap = { 0:1, 1:1, 2:3, 3:3, 4:5, 5:5, 6:9, 7:10, 8:12 };
-        return (index in pointsMap) ? pointsMap[index] : 12 + ((index - 8) * 3);
-    }
-
-    document.getElementById('answer-input').addEventListener('input', (e) => {
-        const userAnswer = cleanText(e.target.value);
-        const correctAnswer = cleanText(currentGameQuestions[currentIndex].country);
-        if (userAnswer === correctAnswer) {
-            playSuccess();
-            score += calculatePoints(currentIndex);
-            currentIndex++;
-            setTimeout(showQuestion, 200);
-        }
-    });
-
-    function gameOver(reason) {
-        clearInterval(timerInterval);
-        document.getElementById('game-screen').classList.add('hidden');
-        if(document.getElementById('end-screen')) document.getElementById('end-screen').classList.remove('hidden');
-
-        if (isFinished) playWinGame();
-        else if (currentIndex < 6) playEpicFail();
-        else playFailGeneral();
-
-        activateLeaderboard(reason);
-    }
-
-    function getRankMessage(s) {
-        if (currentIndex === 0) return "לא טוב דודו, תמחק!"; 
-        if (isFinished) return "הגעת לסוף! אתה אגדה הולנדית של שנות ה-2000.";
-        if (s < 5) return "אתה צופה בכדורגל אבל כנראה שרק בליגת האלופות.";
-        if (s < 10) return "הליגה האירופית קטנה עליך, יאללה נוסעים לראות לאומית.";
-        return "אתה דודו דהן, אתה אייל לחמן, אתה סגן אלוף המשחק!";
-    }
-
-    // Firebase Setup
-    const base = "https://gstatic.com";
-    const s1 = document.createElement('script'); s1.src = base + "firebase-app-compat.js";
-    const s2 = document.createElement('script'); s2.src = base + "firebase-database-compat.js";
-    document.head.appendChild(s1);
-    document.head.appendChild(s2);
-
-    s2.onload = function() {
-        const config = {
-            apiKey: "AIzaSyC3sU5gDuuxW5IFWebIAvm52-RCF7L2tCk",
-            authDomain: "://firebaseapp.com",
-            databaseURL: "https://firebaseio.com",
-            projectId: "geography-football"
+        // הגדרת השאלות (דוגמה - וודא ש-allQuestions מוגדר אצלך!)
+        const allQuestions = {
+            easy: [{team: "מכבי תל אביב", country: "ישראל"}, {team: "ריאל מדריד", country: "ספרד"}],
+            medium: [{team: "אייאקס", country: "הולנד"}],
+            hard: [{team: "לוטון טאון", country: "אנגליה"}]
         };
-        firebase.initializeApp(config);
-        window.database = firebase.database();
-    };
 
-    function activateLeaderboard(reason) {
-        const lb = document.getElementById('leaderboard-section');
-        if (lb) {
-            lb.style.display = 'block';
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(freq, type, duration, vol = 0.1) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.value = freq;
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start();
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playSuccess() { playTone(600, 'sine', 0.2); }
+        function playFailGeneral() { playTone(200, 'sawtooth', 0.6); }
+
+        function cleanText(text) { return text.replace(/['’]/g, '').trim(); }
+
+        function getSmartQuestions(level, count) {
+            let pool = allQuestions[level];
+            return pool.sort(() => Math.random() - 0.5).slice(0, count);
+        }
+
+        function startGame() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            currentGameQuestions = [...getSmartQuestions('easy', 2), ...getSmartQuestions('medium', 1)];
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentIndex >= currentGameQuestions.length) { gameOver("הגעת לסוף!"); return; }
+            const q = currentGameQuestions[currentIndex];
+            document.getElementById('team-name').innerText = q.team;
+            document.getElementById('answer-input').value = "";
+            document.getElementById('answer-input').focus();
+            startTimer(15);
+        }
+
+        function startTimer(time) {
+            clearInterval(timerInterval);
+            let timeLeft = time;
+            document.getElementById('timer').innerText = timeLeft;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerText = timeLeft;
+                if (timeLeft <= 0) gameOver("נגמר הזמן!");
+            }, 1000);
+        }
+
+        document.getElementById('answer-input').addEventListener('input', (e) => {
+            const userAnswer = cleanText(e.target.value);
+            const correctAnswer = cleanText(currentGameQuestions[currentIndex].country);
+            if (userAnswer === correctAnswer) {
+                playSuccess();
+                score += 10;
+                currentIndex++;
+                showQuestion();
+            }
+        });
+
+        function gameOver(reason) {
+            clearInterval(timerInterval);
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('end-screen').classList.remove('hidden');
             document.getElementById('end-reason-text').innerText = reason;
             document.getElementById('final-score-text').innerText = score;
-            document.getElementById('rank-message').innerText = getRankMessage(currentIndex);
-            window.scrollTo({ top: lb.offsetTop, behavior: 'smooth' });
+            document.getElementById('rank-message').innerText = "כל הכבוד!";
         }
-    }
-
-    function submitScore() {
-        const name = document.getElementById('player-name').value;
-        if (!name) return alert("נא להזין שם");
-        window.database.ref('highscores').push({ name, score, date: Date.now() }).then(() => {
-            document.getElementById('save-score-container').style.display = 'none';
-            document.getElementById('table-container').style.display = 'block';
-            loadLeaderboard();
-        });
-    }
-
-    function loadLeaderboard() {
-        window.database.ref('highscores').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
-            let rows = ''; let scores = [];
-            snapshot.forEach(child => { scores.push(child.val()); });
-            scores.sort((a, b) => b.score - a.score);
-            scores.forEach(entry => {
-                rows += `<tr><td style="padding:8px; border:1px solid #ccc;">${entry.name}</td><td style="padding:8px; border:1px solid #ccc;">${entry.score}</td></tr>`;
-            });
-            document.getElementById('table-body').innerHTML = rows;
-        });
-    }
-</script>
+    </script>
+</body>
+</html>
