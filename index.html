@@ -172,14 +172,6 @@
             document.getElementById('correct-answer-reveal').innerText = (q && !isFinished) ? `המדינה הנכונה הייתה: ${q.country}` : "";
             document.getElementById('end-score').innerText = score;
             document.getElementById('end-rank-msg').innerText = getRankMessage(score);
-                  // שמירת שיא אוטומטית
-      setTimeout(() => {
-          let name = prompt("כל הכבוד! הכנס שם לטבלת השיאים:");
-          if (name && name.trim() !== "") {
-              saveScore(name, score, "כללי", false);
-          }
-      }, 500);
-        }  
         }
 
         function getRankMessage(s) {
@@ -197,27 +189,5 @@
             return "";
         }
     </script>
-<script src="https://gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-<script>
-  var firebaseConfig = {
-    apiKey: "AIzaSyC3sU5gDuuxW5IFWebIAvm52-RCF7L2tcK",
-    authDomain: "geography-football.firebaseapp.com",
-    projectId: "geography-football",
-    databaseURL: "https://geography-football-default-rtdb.europe-west1.firebasedatabase.app/",
-    storageBucket: "geography-football.firebasestorage.app",
-    messagingSenderId: "213487524504",
-    appId: "1:213487524504:web:7d14f5a0a73b92a3024eed"
-  };
-  
- if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-
-  window.saveScore = function(n, s, t, c) {
-    firebase.database().ref('leaderboard').push({
-      playerName: n, score: s, team: t, comeback: c, date: new Date().toLocaleString('he-IL')
-    }).then(function() { alert("נשמר!"); });
-  };
-</script>
 </body>
 </html>
