@@ -14,7 +14,10 @@
         .btn-start:hover { transform: scale(1.05); background: #0056b3; }
         #timer { font-size: 48px; color: var(--danger-red); font-weight: bold; margin-bottom: 10px; }
         #difficulty-label { font-size: 20px; font-weight: bold; color: #555; margin-bottom: 5px; border-bottom: 2px solid #eee; display: inline-block; padding-bottom: 5px; }
-        #team-logo { height: 100px; margin-bottom: 15px; object-fit: contain; display: block; margin-left: auto; margin-right: auto; }
+        
+        /* עיצוב הסמל - דואג שיהיה בגודל טוב */
+        #team-logo { height: 120px; margin-bottom: 15px; object-fit: contain; display: block; margin-left: auto; margin-right: auto; }
+        
         #team-name { font-size: 38px; margin: 15px 0 5px 0; color: #1a1a1a; line-height: 1.2; }
         #letter-hint { font-size: 20px; color: #888; margin-bottom: 20px; font-weight: bold; }
         input { padding: 15px; font-size: 24px; width: 80%; border: 3px solid #eee; border-radius: 12px; text-align: center; outline: none; }
@@ -34,7 +37,7 @@
     <div id="game-screen" class="card hidden">
         <div id="timer">20</div>
         <div id="difficulty-label"></div>
-        <img id="team-logo" src="" alt="" class="hidden">
+        <img id="team-logo" src="" alt="" class="hidden"> <!-- המקום של הסמל -->
         <div id="team-name"></div>
         <div id="letter-hint"></div>
         <input type="text" id="answer-input" placeholder="מאיזו מדינה הקבוצה?" autocomplete="off">
@@ -67,6 +70,7 @@
                 { team: "דנדר", country: "בלגיה", logo: "https://wikimedia.org" },
                 { team: "הלמונד ספורט", country: "הולנד", logo: "https://wikimedia.org" },
                 { team: "פ.צ אמן", country: "הולנד", logo: "https://wikimedia.org" },
+                { team: "קיפסיה", country: "יוון", logo: "https://wikimedia.org" },
                 { team: "לבדיאקוס", country: "יוון", logo: "https://wikimedia.org" },
                 { team: "סנטה קלרה", country: "פורטוגל", logo: "https://wikimedia.org" },
                 { team: "רודז", country: "צרפת", logo: "https://wikimedia.org" },
@@ -81,8 +85,10 @@
                 { team: "טורפדו כותאיסי", country: "גאורגיה", logo: "https://wikimedia.org" },
                 { team: "אוניון דפורטיבו אלמריה", country: "ספרד", logo: "https://wikimedia.org" },
                 { team: "מועדון הכדורגל אלמיירה סיטי", country: "הולנד", logo: "https://wikimedia.org" },
-                { team: "אלבסטה באלומפיה", country: "ספרד" }, { team: "קולטורל ודפורטיבה לאונסה", country: "ספרד" },
-                { team: "דפורטיבו מיראנדס", country: "ספרד" }, { team: "סוסיאדד דפורטיבה וֶסְקָה", country: "ספרד" }
+                { team: "אלבסטה באלומפיה", country: "ספרד", logo: "https://wikimedia.org" },
+                { team: "קולטורל ודפורטיבה לאונסה", country: "ספרד", logo: "https://wikimedia.org" },
+                { team: "דפורטיבו מיראנדס", country: "ספרד", logo: "https://wikimedia.org" },
+                { team: "סוסיאדד דפורטיבה וֶסְקָה", country: "ספרד", logo: "https://wikimedia.org" }
             ]
         };
 
@@ -132,7 +138,7 @@
             const q3 = getSmartQuestions('hard', 3);
             currentGameQuestions = [...q1, ...q2, ...q3];
             currentGameQuestions.forEach(q => lastUsed.push(q.team));
-            localStorage.setItem('lastPlayedTeams', JSON.stringify(lastUsed.slice(-60)));
+            localStorage.setItem('lastPlayedTeams', JSON.stringify(lastUsed.slice(-40)));
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
             showQuestion();
@@ -204,6 +210,7 @@
         function getRankMessage(s) {
             if (currentIndex === 0) return "לא טוב דודו, תמחק!"; 
             if (isFinished) return "הגעת לסוף, מכאן זה רק לשמוע את השירים של פיפא 98, ללכת למשחק בליגה השלישית בפורטוגל, להגיע לסיבוב הראשון של הגביע הגרמני ולהתרגש משמות כמו נאק ברדה, צסקא סופיה, פלורה טאלין וראסינג סנטנדר.";
+            
             if (s >= 1 && s <= 5) return "אתה צופה בכדורגל אבל כנראה שרק בליגת האלופות.";
             if (s > 5 && s <= 9) return "הליגה האירופית קטנה עליך,יאללה בוא, נוסעים לראות ליגה לאומית.";
             if (s > 9 && s <= 14) return "אתה רוי מקאי, אתה רונאלד דה בור, אתה אגדה הולנדית של שנות ה-2000, בוא זריז יש משחק של טוונטה נגד ויטסה.";
