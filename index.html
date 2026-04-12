@@ -172,6 +172,14 @@
             document.getElementById('correct-answer-reveal').innerText = (q && !isFinished) ? `המדינה הנכונה הייתה: ${q.country}` : "";
             document.getElementById('end-score').innerText = score;
             document.getElementById('end-rank-msg').innerText = getRankMessage(score);
+                  // שמירת שיא אוטומטית
+      setTimeout(() => {
+          let name = prompt("כל הכבוד! הכנס שם לטבלת השיאים:");
+          if (name && name.trim() !== "") {
+              saveScore(name, score, "כללי", false);
+          }
+      }, 500);
+        }  
         }
 
         function getRankMessage(s) {
