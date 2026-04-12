@@ -205,19 +205,29 @@ function submitScore() {
     const name = nameInput ? nameInput.value.trim() : "";
     if (!name) return alert("נא להזין שם כדי להופיע בטבלה");
 
+    function submitScore() {
+    const nameInput = document.getElementById('player-name');
+    const name = nameInput ? nameInput.value.trim() : "";
+    if (!name) return;
+
     if (window.database) {
         window.database.ref('highscores').push({
             name: name,
             score: score,
             date: Date.now()
         }).then(() => {
+            // מעבר לעמוד הטבלה - הסתרת הסיום והצגת הנתונים
+            document.getElementById('end-screen').classList.add('hidden');
             document.getElementById('save-score-container').classList.add('hidden');
             document.getElementById('table-container').classList.remove('hidden');
             loadLeaderboard();
         });
-    } else {     
     }
 }
+}
+
+
+
 
 // פונקציה שטוענת את התוצאות
 function loadLeaderboard() {
@@ -241,7 +251,8 @@ function loadLeaderboard() {
 
     </script>
     <!-- חלק חדש: טבלת מנצחים -->
-<div id="leaderboard-section" class="card hidden" 
+<div id="leaderboard-section" class="card hidden" style="width: 95%; max-width: 750px; margin: 20px auto;">
+
     <h2 style="color: var(--primary-blue);">טבלת המשחק</h2>
     <p id="leaderboard-status">טוען נתונים...</p>
     
