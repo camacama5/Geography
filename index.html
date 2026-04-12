@@ -156,25 +156,25 @@
         });
 
         function gameOver(reason) {
-            clearInterval(timerInterval);
-            const q = currentGameQuestions[currentIndex];
-            document.getElementById('game-screen').classList.add('hidden');
-            document.getElementById('end-screen').classList.remove('hidden');
-            if (isFinished) playWinGame();
-                activateLeaderboard();
+    clearInterval(timerInterval);
+    const q = currentGameQuestions[currentIndex];
+    document.getElementById('game-screen').classList.add('hidden');
+    document.getElementById('end-screen').classList.remove('hidden');
 
-            else if (currentIndex < 6) playEpicFail();
-            else playFailGeneral();
-            
-            if (currentIndex === 0 && reason !== "נגמר הזמן!") {
-                document.getElementById('end-reason').innerText = "לא טוב דודו, תמחק!";
-            } else {
-                document.getElementById('end-reason').innerText = reason;
-            }
-            document.getElementById('correct-answer-reveal').innerText = (q && !isFinished) ? `המדינה הנכונה הייתה: ${q.country}` : "";
-            document.getElementById('end-score').innerText = score;
-            document.getElementById('end-rank-msg').innerText = getRankMessage(score);
-        }
+    if (isFinished) {
+        playWinGame();
+    } else if (currentIndex < 6) {
+        playEpicFail();
+    } else {
+        playFailGeneral();
+    }
+
+    document.getElementById('end-reason').innerText = reason;
+    document.getElementById('final-score').innerText = score;
+
+    activateLeaderboard();
+}
+
 
         function getRankMessage(s) {
             if (currentIndex === 0) return "לא טוב דודו, תמחק!"; 
