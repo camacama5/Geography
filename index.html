@@ -116,6 +116,14 @@
         let currentIndex = 0;
         let score = 0;
         let timerInterval;
+       function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+        
         let isFinished = false;
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -149,22 +157,31 @@
             const pointsMap = { 0:1, 1:1, 2:3, 3:3, 4:5, 5:5, 6:9, 7:10, 8:12 };
             return (index in pointsMap) ? pointsMap[index] : 12 + ((index - 8) * 3);
         }
-
-        function startGame() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const q1 = getSmartQuestions('easy', 6);
-            const q2 = getSmartQuestions('medium', 5);
-            const q3 = getSmartQuestions('hard', 3);
-            currentGameQuestions = [...q1, ...q2, ...q3];
-            currentGameQuestions.forEach(q => lastUsed.push(q.team));
-            localStorage.setItem('lastPlayedTeams', JSON.stringify(lastUsed.slice(-60)));
-            document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('game-screen').classList.remove('hidden');
-            score = 0;
-            currentIndex = 0;
-            isFinished = false;
-            showQuestion();
-        }
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+function startGame() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    
+    // כאן אנחנו משתמשים בערבוב החדש שהדבקת למעלה
+    const q1 = shuffleArray([...allQuestions.easy]).slice(0, 6);
+    const q2 = shuffleArray([...allQuestions.medium]).slice(0, 5);
+    const q3 = shuffleArray([...allQuestions.hard]).slice(0, 3);
+    
+    currentGameQuestions = [...q1, ...q2, ...q3];
+    
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('game-screen').classList.remove('hidden');
+    
+    score = 0;
+    currentIndex = 0;
+    isFinished = false;
+    showQuestion();
+}
 
         function showQuestion() {
             if (currentIndex >= currentGameQuestions.length) { isFinished = true; gameOver("הגעת לסוף!"); return; }
