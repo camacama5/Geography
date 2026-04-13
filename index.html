@@ -204,7 +204,18 @@ function startGame() {
             timerInterval = setInterval(() => {
                 timeLeft--;
                 document.getElementById('timer').innerText = timeLeft;
-                if (timeLeft <= 0) gameOver("נגמר הזמן!");
+               if (timeLeft <= 0) {
+                // רישום הטעות ב-Firebase לפני סיום המשחק
+                const q = currentGameQuestions[currentIndex];
+                database.ref('wrong_answers').push({
+                    team: q.team,
+                    country: q.country,
+                    reason: "timeout",
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+                
+                gameOver("נגמר הזמן!");
+            }
             }, 1000);
         }
 
