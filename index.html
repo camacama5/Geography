@@ -116,13 +116,15 @@
         let currentIndex = 0;
         let score = 0;
         let timerInterval;
+        let questionStartTime;
+        
        function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
         
         let isFinished = false;
 
@@ -153,35 +155,32 @@
             return pool.sort(() => Math.random() - 0.5).slice(0, count);
         }
 
-        function calculatePoints(index) {
+        function calculatePoints(index, teamName = "") {
             const pointsMap = { 0:1, 1:1, 2:3, 3:3, 4:5, 5:5, 6:9, 7:10, 8:12 };
-            return (index in pointsMap) ? pointsMap[index] : 12 + ((index - 8) * 3);
+            let pts = (index in pointsMap) ? pointsMap[index] : 12 + ((index - 8) * 3);
+            if (["אינטר טורקו", "רודז", "זולטה ורכם", "סנט מירן"].includes(teamName)) {
+                pts += 1;
+            }
+            return pts;
         }
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
-function startGame() {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    
-    // כאן אנחנו משתמשים בערבוב החדש שהדבקת למעלה
-    const q1 = shuffleArray([...allQuestions.easy]).slice(0, 6);
-    const q2 = shuffleArray([...allQuestions.medium]).slice(0, 5);
-    const q3 = shuffleArray([...allQuestions.hard]).slice(0, 3);
-    
-    currentGameQuestions = [...q1, ...q2, ...q3];
-    
-    document.getElementById('start-screen').classList.add('hidden');
-    document.getElementById('game-screen').classList.remove('hidden');
-    
-    score = 0;
-    currentIndex = 0;
-    isFinished = false;
-    showQuestion();
-}
+
+        function startGame() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const q1 = shuffleArray([...allQuestions.easy]).slice(0, 7);
+            const q2 = shuffleArray([...allQuestions.medium]).slice(0, 6);
+            const q3 = shuffleArray([...allQuestions.hard]).slice(0, 4);
+            
+            currentGameQuestions = [...q1, ...q2, ...q3];
+            
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            
+            score = 0;
+            currentIndex = 0;
+            isFinished = false;
+            showQuestion();
+        }
 
         function showQuestion() {
             if (currentIndex >= currentGameQuestions.length) { isFinished = true; gameOver("הגעת לסוף!"); return; }
@@ -191,10 +190,11 @@ function startGame() {
             document.getElementById('letter-hint').innerText = `(${cleanA.length} אותיות)`;
             document.getElementById('answer-input').value = "";
             document.getElementById('answer-input').focus();
-            let levelText = currentIndex < 6 ? "רמה: קל" : (currentIndex < 11 ? "רמה: בינוני" : "רמה: קשה");
+            let levelText = currentIndex < 7 ? "רמה: קל" : (currentIndex < 13 ? "רמה: בינוני" : "רמה: קשה");
             document.getElementById('difficulty-label').innerText = levelText;
-            document.getElementById('score-display').innerText = `ניקוד: ${score} | שאלה ${currentIndex + 1} מתוך 14 | שווי: ${calculatePoints(currentIndex)} נק'`;
-            startTimer(currentIndex < 6 ? 20 : (currentIndex < 11 ? 15 : 10));
+            document.getElementById('score-display').innerText = `ניקוד: ${score} | שאלה ${currentIndex + 1} מתוך 17 | שווי: ${calculatePoints(currentIndex, q.team)} נק'`;
+            startTimer(currentIndex < 7 ? 20 : (currentIndex < 13 ? 15 : 10));
+            questionStartTime = Date.now();
         }
 
         function startTimer(time) {
@@ -221,10 +221,15 @@ function startGame() {
 
         document.getElementById('answer-input').addEventListener('input', (e) => {
             const userAnswer = cleanText(e.target.value);
-            const correctAnswer = cleanText(currentGameQuestions[currentIndex].country);
+            const q = currentGameQuestions[currentIndex];
+            const correctAnswer = cleanText(q.country);
             if (userAnswer === correctAnswer) {
                 playSuccess();
-                score += calculatePoints(currentIndex);
+                let ptsToAdd = calculatePoints(currentIndex, q.team);
+                if (questionStartTime && (Date.now() - questionStartTime) < 5000) {
+                    ptsToAdd += 1;
+                }
+                score += ptsToAdd;
                 currentIndex++;
                 setTimeout(showQuestion, 200);
             }
@@ -236,7 +241,7 @@ function startGame() {
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('end-screen').classList.remove('hidden');
             if (isFinished) playWinGame();
-            else if (currentIndex < 6) playEpicFail();
+            else if (currentIndex < 7) playEpicFail();
             else playFailGeneral();
             
             if (currentIndex === 0 && reason !== "נגמר הזמן!") {
@@ -250,19 +255,19 @@ function startGame() {
         }
 
       function getRankMessage(s) {
-    if (currentIndex === 0) return "לא טוב דודו, תמחק!"; 
-    if (isFinished) return "הגעת לסוף, מכאן זה רק לשמוע את השירים של פיפא 98, ללכת למשחק בליגה השלישית בפורטוגל, להגיע לסיבוב הראשון של הגביע הגרמני ולהתרגש משמות כמו נאק ברדה, צסקא סופיה, פלורה טאלין וראסינג סנטנדר.";
-    if (s >= 1 && s <= 5) return "אתה צופה בכדורגל אבל כנראה שרק בליגת האלופות.";
-    if (s > 5 && s <= 9) return "הליגה האירופית קטנה עליך, יאללה בוא, נוסעים לראות ליגה לאומית.";
-    if (s > 9 && s <= 14) return "אתה רוי מקאי, אתה רונאלד דה בור, אתה אגדה הולנדית של שנות ה-2000, בוא זריז יש משחק של טוונטה נגד ויטסה.";
-    if (s > 14 && s <= 19) return "אתה אגדת כדורגל אירופית, אתה אורח כבוד אצל תיירי הנרי ודל פיירו רוצה ממך טיפים, אתה פאגינג גאון.";
-    if (s > 19 && s <= 30) return "אתה אגדה חייה, אתה רונאלדו השמן לפני שהיה כריסטיאנו, את דודו אוואט בלה ליגה ואתה בלתי נגמר.";
-    if (s > 30 && s <= 40) return "אתה הפועל תל אביב בגביע אופ\"א עברת כל כך הרבה שאף אחד כבר לא יודע אם היריבה הבאה קיימת.";
-    if (s > 40 && s <= 59) return "בטח אתה אומר שהכל היה סטאם, יאפ סטאם.";
-    if (s >= 60 && s <= 90) return "אתה כל כך גדול שהדחת קבוצה מאיסלנד ממוקדמות הליגה האזורית.";
-    if (s > 90) return "אתה דודו דהן, אתה אייל לחמן, אתה אדם שיודע מי משחק בליגה הקזחית השנייה. אתה סגן אלוף המשחק (למה סגן אתה שואל?, כי לא הגעת לנק' הסיום!!!!)";
-    return "";
-}
+            if (currentIndex === 0) return "לא טוב דודו, תמחק!"; 
+            if (isFinished) return "הגעת לסוף, מכאן זה רק לשמוע את השירים של פיפא 98, ללכת למשחק בליגה השלישית בפורטוגל, להגיע לסיבוב הראשון של הגביע הגרמני ולהתרגש משמות כמו נאק ברדה, צסקא סופיה, פלורה טאלין וראסינג סנטנדר.";
+            if (s >= 1 && s <= 5) return "אתה צופה בכדורגל אבל כנראה שרק בליגת האלופות.";
+            if (s > 5 && s <= 9) return "הליגה האירופית קטנה עליך, יאללה בוא, נוסעים לראות ליגה לאומית.";
+            if (s > 9 && s <= 14) return "אתה רוי מקאי, אתה רונאלד דה בור, אתה אגדה הולנדית של שנות ה-2000, בוא זריז יש משחק של טוונטה נגד ויטסה.";
+            if (s > 14 && s <= 19) return "אתה אגדת כדורגל אירופית, אתה אורח כבוד אצל תיירי הנרי ודל פיירו רוצה ממך טיפים, אתה פאגינג גאון.";
+            if (s > 19 && s <= 30) return "אתה אגדה חייה, אתה רונאלדו השמן לפני שהיה כריסטיאנו, את דודו אוואט בלה ליגה ואתה בלתי נגמר.";
+            if (s > 30 && s <= 40) return "אתה הפועל תל אביב בגביע אופ\"א עברת כל כך הרבה שאף אחד כבר לא יודע אם היריבה הבאה קיימת.";
+            if (s > 40 && s <= 59) return "בטח אתה אומר שהכל היה סטאם, יאפ סטאם.";
+            if (s >= 60 && s < 90) return "אתה כל כך גדול שהדחת קבוצה מאיסלנד ממוקדמות הליגה האזורית.";
+            if (s >= 90) return "ברכות! אתה רונאלדיניו, הגעת כל כך רחוק במשחק שלאף אחד לא מובן איך לא סיימת מקום ראשון, זה הזמן לנסות שוב.";
+            return "";
+        }
 
         // --- פונקציית שליחת התוצאה ל-Realtime Database ---
         function submitScore() {
