@@ -61,7 +61,8 @@
         const loadingDiv = document.getElementById('loading');
         const table = document.getElementById('leaderboard-table');
 
-        database.ref('leaderboard').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
+        // שינוי המגבלה מ-10 ל-30
+        database.ref('leaderboard').orderByChild('score').limitToLast(30).once('value', (snapshot) => {
             let scores = [];
             snapshot.forEach((childSnapshot) => {
                 scores.push(childSnapshot.val());
